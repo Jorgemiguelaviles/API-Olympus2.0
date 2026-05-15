@@ -47,7 +47,7 @@ A proposta é construir uma arquitetura escalável, segura e preparada para evol
 ## 📥 Clonando o Repositório
 
 ```bash
-git clone https://github.com/Jorgemiguelaviles/API-Olympus.git
+git clone https://github.com/Jorgemiguelaviles/API-Olympus2.0.git
 cd API-Olympus
 ```
 
