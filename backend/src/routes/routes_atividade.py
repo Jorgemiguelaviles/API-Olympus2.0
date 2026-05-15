@@ -13,7 +13,30 @@ router = APIRouter(
 
 
 # Mock temporário até conectar service/repository
-fake_db = []
+banco_falso = {
+        "funcional": 123,
+        "codigo_atividade": "A001",
+        "descricao": "Corrida de 5km",
+        "data_hora": __import__("datetime").datetime.now()
+    },
+    {
+        "funcional": 123,
+        "codigo_atividade": "A002",
+        "descricao": "Natação de 30 minutos",
+        "data_hora": __import__("datetime").datetime.now()
+    },
+    {
+        "funcional": 456,
+        "codigo_atividade": "A003",
+        "descricao": "Ciclismo de 10km",
+        "data_hora": __import__("datetime").datetime.now()
+    }
+
+banco_atividades_existentes = [
+    
+]
+
+
 
 
 @router.post(
@@ -32,7 +55,7 @@ def create_activity(payload: ActivityCreateSchema):
         "data_hora": __import__("datetime").datetime.now()
     }
 
-    fake_db.append(activity)
+    banco_falso.append(activity)
 
     return activity
 
@@ -45,7 +68,17 @@ def create_activity(payload: ActivityCreateSchema):
 )
 def get_all_activities():
 
-    return fake_db
+    return banco_falso
+
+@router.get(
+    "/optionsActivys",
+    response_model=List[ActivityResponseSchema],
+    summary="Listar todas as atividades",
+    description="Retorna todas as atividades registradas."
+)
+def get_all_activities():
+
+    return banco_atividades_existentes
 
 
 @router.get(
