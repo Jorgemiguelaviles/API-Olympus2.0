@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from src.routes.activity_routes import router as activity_router
+from src.routes.routes_atividade import router as activity_router
 
 app = FastAPI(
     title="Olympus API",
