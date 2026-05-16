@@ -2,7 +2,7 @@ from fastapi import HTTPException
 
 from src.services.validadores.valida_atividades_realizadas import service_validacao_atividade
 from src.services.service_bancos.atividades_existentes import (
-    service_atividades
+    service_atividades_realizadas
 )
 
 
@@ -19,7 +19,7 @@ class controller_atividades_realizadas:
 
         try:
             
-            service = service_atividades(
+            service = service_atividades_realizadas(
                 self.db
             )
 
@@ -55,7 +55,7 @@ class controller_atividades_realizadas:
 
         try:
 
-            service = service_atividades(
+            service = service_atividades_realizadas(
                 self.db
             )
 
@@ -106,7 +106,7 @@ class controller_atividades_realizadas:
             # ==========================
             # 2 - Persistir no banco
             # ==========================
-            service_banco = service_atividades(
+            service_banco = service_atividades_realizadas(
                 self.db
             )
 

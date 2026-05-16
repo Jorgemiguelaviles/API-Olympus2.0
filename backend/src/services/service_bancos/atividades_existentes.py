@@ -4,7 +4,7 @@ from src.models.model_atividade_realizada import (
 )
 
 
-class service_atividades:
+class service_atividades_realizadas:
 
     def __init__(self, db):
         self.db = db
