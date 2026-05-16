@@ -1,5 +1,5 @@
 from src.models.model_atividade import model_atividades
-from backend.src.models.model_atividade_realizadas import (
+from src.models.model_atividade_realizadas import (
     model_atividades_realizadas
 )
 
