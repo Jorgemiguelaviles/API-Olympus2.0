@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
-from src.services.service_bancos.service_atividades_realizadas import (
-    service_atividades_realizadas
+from src.services.service_bancos.atividades_existentes import (
+    service_atividades
 )
 
 
@@ -17,12 +17,12 @@ class controller_atividades_realizadas:
     def buscar_todas_atividades(self):
 
         try:
-
-            service = service_atividades_realizadas(
+            
+            service = service_atividades(
                 self.db
             )
 
-            atividades = service.buscar_todas_atividades()
+            atividades = service.get_recupera_todas_atividades()
 
             if not atividades:
 
@@ -54,11 +54,11 @@ class controller_atividades_realizadas:
 
         try:
 
-            service = service_atividades_realizadas(
+            service = service_atividades(
                 self.db
             )
 
-            atividades = service.buscar_por_funcional(
+            atividades = service.get_recupera_atividades_por_funcional(
                 funcional
             )
 

@@ -19,7 +19,7 @@ class controller_atividade_existente:
                 self.db
             )
 
-            atividades = service.buscar_todas_atividades()
+            atividades = service.get_recupera_todas_atividades()
 
             if not atividades:
 

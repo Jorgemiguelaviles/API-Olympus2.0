@@ -1,7 +1,6 @@
-from datetime import datetime
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 
@@ -9,8 +8,6 @@ from src.config.config_banco import get_db
 
 
 from src.interfaces.schema_atividades import (
-    AtividadeCriacaoSchema,
-    AtividadeRespostaSchema,
     AtividadeExistenteResponseSchema
 )
 from src.contollers.atividades_existentes import controller_atividade_existente
