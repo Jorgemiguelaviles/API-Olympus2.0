@@ -35,6 +35,9 @@ CREATE TABLE atividade_realizada (
 );
 
 
+
+-- massas de testes
+
 INSERT INTO atividade (nome_atividade)
 VALUES
 ('RUN'),
@@ -45,3 +48,46 @@ VALUES
 
 SELECT * FROM atividade;
 
+
+
+
+
+
+INSERT INTO atividade_realizada (
+    funcional,
+    codigo_atividade,
+    descricao
+)
+VALUES
+
+(
+    1001,
+    (SELECT codigo_atividade FROM atividade WHERE nome_atividade = 'RUN'),
+    'Corrida de 5km'
+),
+
+(
+    1001,
+    (SELECT codigo_atividade FROM atividade WHERE nome_atividade = 'SWIM'),
+    'Natação de 30 minutos'
+),
+
+(
+    1002,
+    (SELECT codigo_atividade FROM atividade WHERE nome_atividade = 'CYCL'),
+    'Ciclismo de 12km'
+),
+
+(
+    1002,
+    (SELECT codigo_atividade FROM atividade WHERE nome_atividade = 'WALK'),
+    'Caminhada de recuperação'
+),
+
+(
+    1003,
+    (SELECT codigo_atividade FROM atividade WHERE nome_atividade = 'YOGA'),
+    'Sessão de mobilidade'
+);
+
+select * from atividade_realizada;
