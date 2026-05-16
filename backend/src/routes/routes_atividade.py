@@ -30,8 +30,6 @@ banco_falso = {
         "data_hora": __import__("datetime").datetime.now()
     }
 
-banco_atividades_existentes = ["RUN", "SWIM", "CYCL", "WALK", "YOGA"]
-
 
 
 

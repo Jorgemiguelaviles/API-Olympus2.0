@@ -48,7 +48,7 @@ A proposta é construir uma arquitetura escalável, segura e preparada para evol
 
 ```bash
 git clone https://github.com/Jorgemiguelaviles/API-Olympus2.0.git
-cd API-Olympus
+cd API-Olympus2.0/backend
 ```
 
 ---
@@ -121,7 +121,7 @@ DB_NAME=
 
 A API gerencia:
 
-- autenticação de usuários
+- autenticação de usuários (sera adicionado na versão 2.0)
 - cadastro de atividades físicas
 - associação de atividades por categoria/tag
 - registro de atividades executadas
@@ -158,7 +158,7 @@ Essa separação permite:
 - Python
 - Pydantic
 - SQLAlchemy
-- JWT
+- JWT (adicionado na 2 versão)
 - MySQL
 - Pytest
 
@@ -203,7 +203,7 @@ Escolhido por:
 - consistência transacional
 - ampla adoção no mercado
 
-## JWT
+## JWT (2 versão)
 
 Escolhido para:
 
@@ -234,9 +234,9 @@ backend/
 │   ├── config/
 │   ├── controllers/
 │   ├── interfaces/
-│   ├── middlewares/
+│   ├── middlewares/ (sera adicionado na versão 2.0)
 │   ├── models/
-│   ├── repositories/
+│   ├── assets/
 │   ├── routes/
 │   ├── services/
 │   └── validators/
@@ -252,8 +252,7 @@ backend/
 Configurações globais:
 
 - banco de dados
-- JWT
-- ambiente
+- JWT (sera adicionado na versão 2.0)
 
 ---
 
@@ -266,12 +265,6 @@ Controla o fluxo das requisições HTTP.
 ### `models/`
 
 Entidades e representação do banco.
-
----
-
-### `repositories/`
-
-Responsável pelo acesso aos dados.
 
 ---
 
