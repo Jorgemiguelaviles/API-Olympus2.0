@@ -96,7 +96,8 @@ class controller_atividades_realizadas:
             # 1 - Validar dados
             # ==========================
             service_validacao_atividade().validar(
-                payload
+                payload,
+                self.db
             )
 
             print("Validação bem-sucedida para o payload:", payload)
