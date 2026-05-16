@@ -1,10 +1,11 @@
 from sqlalchemy import Column, BigInteger, String, TIMESTAMP, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from src.config.database_config import Base
+from src.config.config_banco import Base
 
 
-class ActivityModel(Base):
+class model_atividades_realizadas(Base):
     __tablename__ = "atividade_realizada"
 
     id_atividade_realizada = Column(
@@ -32,4 +33,9 @@ class ActivityModel(Base):
 
     descricao = Column(
         String(255)
+    )
+
+    atividade = relationship(
+        "model_atividades",
+        back_populates="atividades_realizadas"
     )

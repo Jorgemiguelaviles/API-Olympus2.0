@@ -1,10 +1,10 @@
 from sqlalchemy import Column, BigInteger, String
 from sqlalchemy.orm import relationship
 
-from src.config.database_config import Base
+from src.config.config_banco import Base
 
 
-class ActivityModel(Base):
+class model_atividades(Base):
     __tablename__ = "atividade"
 
     codigo_atividade = Column(
@@ -20,6 +20,6 @@ class ActivityModel(Base):
     )
 
     atividades_realizadas = relationship(
-        "ActivityRequestModel",
+        "model_atividades_realizadas",
         back_populates="atividade"
     )

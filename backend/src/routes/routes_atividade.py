@@ -1,90 +1,139 @@
-from fastapi import APIRouter, status
+from datetime import datetime
 from typing import List
 
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.orm import Session
+
+
+from src.config.config_banco import get_db
+
+
 from src.interfaces.schema_atividades import (
-    ActivityCreateSchema,
-    ActivityResponseSchema
+    AtividadeCriacaoSchema,
+    AtividadeRespostaSchema
+)
+from src.contollers.atividades_existentes import controller_atividade_existente
+
+
+
+roteador = APIRouter(
+    prefix="/atividades",
+    tags=["Atividades"]
 )
 
-router = APIRouter(
-    prefix="/activities",
-    tags=["Activities"]
-)
 
+# ==========================================
+# Mock temporário para o case
+# ==========================================
 
-# Mock temporário até conectar service/repository
-banco_falso = {
+banco_falso = [
+    {
         "funcional": 123,
         "codigo_atividade": "RUN",
         "descricao": "Corrida de 5km",
-        "data_hora": __import__("datetime").datetime.now()
-    },{
+        "data_hora": datetime.now()
+    },
+    {
         "funcional": 123,
         "codigo_atividade": "SWIM",
         "descricao": "Natação de 30 minutos",
-        "data_hora": __import__("datetime").datetime.now()
-    },{
+        "data_hora": datetime.now()
+    },
+    {
         "funcional": 456,
         "codigo_atividade": "CYCL",
         "descricao": "Ciclismo de 10km",
-        "data_hora": __import__("datetime").datetime.now()
+        "data_hora": datetime.now()
     }
+]
 
 
+# Atividades disponíveis no sistema
+banco_atividades_existentes = [
+    "RUN",
+    "SWIM",
+    "CYCL",
+    "WALK",
+    "YOGA"
+]
 
 
-@router.post(
+# ==========================================
+# Cadastro de atividade realizada
+# ==========================================
+
+@roteador.post(
     "/",
-    response_model=ActivityResponseSchema,
+    response_model=AtividadeRespostaSchema,
     status_code=status.HTTP_201_CREATED,
-    summary="Cadastrar uma atividade realizada",
+    summary="Cadastrar atividade",
     description="Cria um novo registro de atividade física."
 )
-def create_activity(payload: ActivityCreateSchema):
+def cadastrar_atividade(
+    payload: AtividadeCriacaoSchema
+):
 
-    activity = {
+    nova_atividade = {
         "funcional": payload.funcional,
         "codigo_atividade": payload.codigo_atividade,
         "descricao": payload.descricao,
-        "data_hora": __import__("datetime").datetime.now()
+        "data_hora": datetime.now()
     }
 
-    banco_falso.append(activity)
+    banco_falso.append(
+        nova_atividade
+    )
 
-    return activity
+    return nova_atividade
 
 
-@router.get(
+# ==========================================
+# Buscar todas as atividades realizadas
+# ==========================================
+
+@roteador.get(
     "/",
-    response_model=List[ActivityResponseSchema],
-    summary="Listar todas as atividades",
+    response_model=List[AtividadeRespostaSchema],
+    summary="Buscar todas as atividades",
     description="Retorna todas as atividades registradas."
 )
-def get_all_activities():
+def buscar_todas_atividades():
 
     return banco_falso
 
-@router.get(
-    "/opcoesAtividades",
-    response_model=List[ActivityResponseSchema],
-    summary="Listar todas as atividades",
-    description="Retorna todas as atividades registradas."
+
+# ==========================================
+# Buscar opções de atividades disponíveis
+# ==========================================
+
+@roteador.get(
+    "/opcoes",
+    summary="Buscar atividades disponíveis",
+    description="Retorna as atividades disponíveis para seleção."
 )
-def get_all_activities():
+def buscar_opcoes_atividades(
+    db: Session = Depends(get_db)
+):
 
-    return banco_atividades_existentes
+    return controller_atividade_existente(db).get_all_activities()
 
 
-@router.get(
+# ==========================================
+# Buscar atividades por funcional
+# ==========================================
+
+@roteador.get(
     "/{funcional}",
-    response_model=List[ActivityResponseSchema],
-    summary="Buscar atividades por funcional",
-    description="Retorna atividades registradas de um usuário específico."
+    response_model=List[AtividadeRespostaSchema],
+    summary="Buscar atividade por funcional",
+    description="Retorna atividades vinculadas a um funcional."
 )
-def get_activity_by_funcional(funcional: int):
+def buscar_por_funcional(
+    funcional: int
+):
 
     return [
-        activity
-        for activity in fake_db
-        if activity["funcional"] == funcional
+        atividade
+        for atividade in banco_falso
+        if atividade["funcional"] == funcional
     ]

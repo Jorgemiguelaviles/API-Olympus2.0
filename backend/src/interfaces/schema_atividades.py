@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 
-class ActivityCreateSchema(BaseModel):
+class AtividadeCriacaoSchema(BaseModel):
     funcional: int = Field(
         ...,
         example=12345,
@@ -23,7 +23,7 @@ class ActivityCreateSchema(BaseModel):
     )
 
 
-class ActivityResponseSchema(BaseModel):
+class AtividadeRespostaSchema(BaseModel):
     funcional: int
     codigo_atividade: str
     descricao: Optional[str]
