@@ -45,6 +45,7 @@ def cadastrar_atividade(
         "data_hora": datetime.now()
     }
 
+
     controller_atividades_realizadas(db).cadastrar_atividade(nova_atividade)
 
     return nova_atividade
@@ -86,3 +87,6 @@ def buscar_todas_atividades(
 ):
 
     return controller_atividades_realizadas(db).buscar_todas_atividades()
+
+
+

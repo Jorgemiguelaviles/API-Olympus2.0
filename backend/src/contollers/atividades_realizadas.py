@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 
+from src.services.validadores.valida_atividades_realizadas import service_validacao_atividade
 from src.services.service_bancos.atividades_existentes import (
     service_atividades
 )
@@ -80,3 +81,50 @@ class controller_atividades_realizadas:
                 status_code=500,
                 detail=f"Erro interno ao consultar funcional: {str(erro)}"
             )
+        
+    
+        
+
+    def cadastrar_atividade(
+        self,
+        payload
+    ):
+
+        try:
+
+            # ==========================
+            # 1 - Validar dados
+            # ==========================
+            service_validacao_atividade().validar(
+                payload
+            )
+
+            print("Validação bem-sucedida para o payload:", payload)
+
+
+            # ==========================
+            # 2 - Persistir no banco
+            # ==========================
+            service_banco = service_atividades(
+                self.db
+            )
+
+            atividade = service_banco.salvar(
+                payload
+            )
+
+            return atividade
+
+
+        except HTTPException:
+            raise
+
+
+        except Exception as erro:
+
+            raise HTTPException(
+                status_code=500,
+                detail=f"Erro interno ao cadastrar atividade: {str(erro)}")
+            
+
+

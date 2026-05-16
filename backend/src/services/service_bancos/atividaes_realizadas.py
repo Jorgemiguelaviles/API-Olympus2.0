@@ -36,3 +36,5 @@ class service_atividades_realizadas:
         ).all()
 
         return atividades
+    
+
