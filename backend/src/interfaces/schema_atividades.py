@@ -34,6 +34,7 @@ class AtividadeRespostaSchema(BaseModel):
 
 class AtividadeExistenteResponseSchema(BaseModel):
     codigo_atividade: str
+    nome_atividade: str
 
     class Config:
         from_attributes = True

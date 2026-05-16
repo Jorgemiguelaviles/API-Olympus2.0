@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from src.services.service_bancos.atividaes_realizadas import (
+from src.services.service_bancos.atividades_existentes import (
     service_atividades )
 
 
@@ -18,6 +18,8 @@ class controller_atividade_existente:
             )
 
             atividades = service.buscar_todas_atividades()
+
+            print('atividdes', atividades)
 
             if not atividades:
 

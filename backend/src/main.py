@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 from src.routes.routes_atividade import roteador_atividades as rotas_de_atividades
-from src.routes.routes_atividades_praticadas import roteador_atividades_praticadas as rotas_de_atividades_praticadas
+from backend.src.routes.routes_atividades_realizadas import roteador_atividades_praticadas as rotas_de_atividades_praticadas
 from src.models.model_atividade import model_atividades
-from src.models.model_atividade_realizada import model_atividades_realizadas
+from backend.src.models.model_atividade_realizadas import model_atividades_realizadas
 
 app = FastAPI(
     title="Olympus API",

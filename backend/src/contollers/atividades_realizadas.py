@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from src.services.validadores.valida_atividades_realizadas import service_validacao_atividade
-from src.services.service_bancos.atividades_existentes import (
+from src.services.service_bancos.atividades_realizadas import (
     service_atividades_realizadas
 )
 

@@ -14,7 +14,9 @@
 - [🧪 Estratégia de Testes](#-estratégia-de-testes)
 - [⚙️ Decisões Técnicas](#️-decisões-técnicas)
 - [📁 Estrutura do Projeto](#-estrutura-do-projeto)
+- [🧐 Exemplos de Uso](#-exemplos-de-uso)
 - [🚧 Melhorias Futuras](#-melhorias-futuras)
+- [🔮 Pontos de Observação](#-pontos-de-observação)
 
 ---
 
@@ -121,7 +123,7 @@ DB_NAME=
 
 A API gerencia:
 
-- autenticação de usuários (sera adicionado na versão 2.0)
+- autenticação de usuários (será adicionado na versão 2.0)
 - cadastro de atividades físicas
 - associação de atividades por categoria/tag
 - registro de atividades executadas
@@ -158,7 +160,7 @@ Essa separação permite:
 - Python
 - Pydantic
 - SQLAlchemy
-- JWT (adicionado na 2 versão)
+- JWT (adicionado na versão 2.0)
 - MySQL
 - Pytest
 
@@ -203,7 +205,7 @@ Escolhido por:
 - consistência transacional
 - ampla adoção no mercado
 
-## JWT (2 versão)
+## JWT (versão 2.0)
 
 Escolhido para:
 
@@ -234,7 +236,7 @@ backend/
 │   ├── config/
 │   ├── controllers/
 │   ├── interfaces/
-│   ├── middlewares/ (sera adicionado na versão 2.0)
+│   ├── middlewares/ (será adicionado na versão 2.0)
 │   ├── models/
 │   ├── assets/
 │   ├── routes/
@@ -252,7 +254,7 @@ backend/
 Configurações globais:
 
 - banco de dados
-- JWT (sera adicionado na versão 2.0)
+- JWT (será adicionado na versão 2.0)
 
 ---
 
@@ -298,6 +300,25 @@ Testes automatizados da aplicação.
 
 ---
 
+# 🧐 Exemplos de Uso
+
+### Criar atividade
+
+```http
+POST /activities
+```
+
+Payload:
+
+```json
+{
+  "name": "Supino reto",
+  "category": "Peito"
+}
+```
+
+---
+
 # 🚧 Melhorias Futuras
 
 - refresh token
@@ -307,5 +328,14 @@ Testes automatizados da aplicação.
 - containerização com Docker
 - CI/CD com GitHub Actions
 - deploy na AWS
+
+---
+
+# 🔮 Pontos de Observação
+
+- autenticação JWT será implementada na versão 2.0
+- middlewares de segurança ainda serão adicionados
+- projeto focado inicialmente em arquitetura backend
+- cobertura de testes será expandida conforme evolução do sistema
 
 ---
