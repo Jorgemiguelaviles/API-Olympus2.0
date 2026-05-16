@@ -1,4 +1,4 @@
-from src.services.service_bancos.atividades_existentes import ActivityService
+from src.services.service_bancos.atividades_existentes import service_atividades
 
 
 class controller_atividade_existente:
@@ -7,10 +7,10 @@ class controller_atividade_existente:
         self.db = db
 
 
-    def get_all_activities(self):
+    def gerencia_atividades(self):
 
-        service = ActivityService(
+        service = service_atividades(
             self.db
         )
 
-        return service.get_all_activities()
+        return service.get_recupera_todas_atividades()

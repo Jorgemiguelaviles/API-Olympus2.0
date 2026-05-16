@@ -115,7 +115,7 @@ def buscar_opcoes_atividades(
     db: Session = Depends(get_db)
 ):
 
-    return controller_atividade_existente(db).get_all_activities()
+    return controller_atividade_existente(db).gerencia_atividades()
 
 
 # ==========================================
