@@ -238,7 +238,6 @@ backend/
 │   ├── interfaces/
 │   ├── middlewares/ (será adicionado na versão 2.0)
 │   ├── models/
-│   ├── assets/
 │   ├── routes/
 │   ├── services/
 │   └── validators/
