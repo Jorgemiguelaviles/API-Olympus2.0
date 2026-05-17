@@ -302,20 +302,21 @@ Testes automatizados da aplicação.
 
 # 🧐 Exemplos de Uso
 
-### Criar atividade
+### Recupera lista de atividades existentes
+![alt text](image.png)
 
-```http
-POST /activities
-```
+### Recupera lista de atividades execultadas
+![alt text](image-2.png)
 
-Payload:
 
-```json
-{
-  "name": "Supino reto",
-  "category": "Peito"
-}
-```
+### Recupera lista de atividades execultadas por funcional
+![alt text](image-1.png)
+
+
+### Cadastra atividades execultadas
+
+
+
 
 ---
 
@@ -333,9 +334,11 @@ Payload:
 
 # 🔮 Pontos de Observação
 
-- autenticação JWT será implementada na versão 2.0
-- middlewares de segurança ainda serão adicionados
-- projeto focado inicialmente em arquitetura backend
-- cobertura de testes será expandida conforme evolução do sistema
+- a API poderia contar com um sistema de login aonde camuflaria a funcional do usuario por meio de um JWT ou ainda usando um azure para assim a funcional vier camuflada
+- poderiam se existir mais tipos de usuarios alem de mais informações sobre o mesmo, podendo essas infromações serem preenchidas de forma manual ou recuperadas por intermedio de uma API de email como a do google, hotmail....
+- o usuario sendo do tipo root, semelhante ao que se encontra comentado, poderia ter outras atualizações, como caso o sistema vier ser comeercializado, desabilitando o mesmo atraves de pquenos comandos, ou podendo por exemplo criar outros tipos de esportes como calisthenics, skate....
+- ainda nos dias atuais poderiamos fazer um monitoramento de forma mais aprofundada atraves dos comentarios dos usuarios podendo fazer uma analise por meio de IAs trazendo possiveis previsibilidades de resultdos futuros caso a pessoa continue seguindo um determinado ritmo
+- na recuperação de lista de todas as atividade execultadas dependendo do caso poderia vim ter sido feita por meio de paginação
+- no cadastro da atividade se pensarmos em um contexto geral poderia vir possuir numeros e letras, todavia no caso do case a unica verificação colocada foi garantir que a mesma fosse devidamente preenchida com validação de uma regex sndo composto por intermedio de 9 números
 
 ---
