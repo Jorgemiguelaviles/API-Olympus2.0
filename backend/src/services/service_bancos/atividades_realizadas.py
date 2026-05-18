@@ -36,8 +36,16 @@ class service_atividades_realizadas:
             model_atividades_realizadas.funcional == funcional
         ).all()
 
-        return atividades
-    
+        return [
+            {
+                "funcional": atividade.funcional,
+                "codigo_atividade": atividade.codigo_atividade,
+                "descricao": atividade.descricao,
+                "data_hora": atividade.data_hora
+            }
+            for atividade in atividades
+        ]
+            
 
 
         

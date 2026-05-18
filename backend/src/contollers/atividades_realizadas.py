@@ -1,5 +1,10 @@
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 from fastapi import HTTPException
 
+from src.services.service_APIs.service_gemini import service_gemini
 from src.services.validadores.valida_atividades_realizadas import service_validacao_atividade
 from src.services.service_bancos.atividades_realizadas import (
     service_atividades_realizadas
@@ -59,9 +64,53 @@ class controller_atividades_realizadas:
                 self.db
             )
 
+            print('funcional', funcional)
+
             atividades = service.get_recupera_atividades_por_funcional(
                 funcional
             )
+
+            print(type(atividades))
+            print(atividades)
+
+            descricoes = [
+                atividade["descricao"]
+                for atividade in atividades
+                if atividade["descricao"]
+            ]
+
+            # ==========================================
+            # Carregar variáveis de ambiente
+            # ==========================================
+
+            BASE_DIR = Path(
+                __file__
+            ).resolve().parent.parent.parent.parent
+
+            load_dotenv(
+                dotenv_path=BASE_DIR / ".env"
+            )
+
+            chave_api = os.getenv(
+                "API_KEY_GEMINI"
+            )
+
+            if chave_api:
+                resultado_ia = service_gemini(chave_api).analisa_dados(
+                    dados_usuario=descricoes,
+                    prompt_usuario=(
+                        "Analise a evolução física do usuário "
+                        "com base nos treinos realizados."
+                    )
+                )
+            
+            else:
+                resultado_ia = "API_KEY_GEMINI não configurada. Análise de IA não realizada."
+
+            print('resultado_ia:', resultado_ia)
+            print('atividades', atividades)
+
+
 
             if not atividades:
 
@@ -69,8 +118,13 @@ class controller_atividades_realizadas:
                     status_code=404,
                     detail="Nenhuma atividade encontrada para este funcional."
                 )
+            
+            response = {
+                "atividades": atividades,
+                "analise_ia": resultado_ia}
+            
 
-            return atividades
+            return response
 
         except HTTPException:
             raise

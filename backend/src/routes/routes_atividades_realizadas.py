@@ -8,7 +8,8 @@ from src.config.config_banco import get_db
 
 from src.interfaces.schema_atividades import (
     AtividadeCriacaoSchema,
-    AtividadeRespostaSchema
+    AtividadeRespostaSchema,
+    AtividadeComAnaliseSchema
 )
 
 from src.contollers.atividades_realizadas import (
@@ -84,7 +85,7 @@ def cadastrar_atividade(
 
 @roteador_atividades_praticadas.get(
     "/{funcional}",
-    response_model=List[AtividadeRespostaSchema],
+    response_model=AtividadeComAnaliseSchema,
     summary="Buscar atividades por funcional",
     description="Retorna todas as atividades vinculadas a um funcional.",
     responses={
@@ -92,20 +93,17 @@ def cadastrar_atividade(
             "description": "Atividades encontradas com sucesso.",
             "content": {
                 "application/json": {
-                    "example": [
-                        {
-                            "funcional": 123456789,
-                            "codigo_atividade": 1,
-                            "descricao": "Treino de peito",
-                            "data_hora": "2026-05-17T14:30:00"
-                        },
-                        {
-                            "funcional": 123456789,
-                            "codigo_atividade": 2,
-                            "descricao": "Treino de perna",
-                            "data_hora": "2026-05-17T18:00:00"
-                        }
-                    ]
+                    "example": {
+                        "atividades": [
+                            {
+                                "funcional": 123456789,
+                                "codigo_atividade": 1,
+                                "descricao": "Treino de peito",
+                                "data_hora": "2026-05-17T14:30:00"
+                            }
+                        ],
+                        "analise_ia": "Análise gerada pela IA sobre as atividades realizadas."
+                    }
                 }
             }
         },
@@ -126,11 +124,15 @@ def buscar_por_funcional(
     db: Session = Depends(get_db)
 ):
 
-    return controller_atividades_realizadas(
+    response = controller_atividades_realizadas(
         db
     ).buscar_por_funcional(
         funcional
     )
+
+    print('response', response)
+
+    return response
 
 
 # ==========================================

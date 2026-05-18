@@ -32,6 +32,14 @@ class AtividadeRespostaSchema(BaseModel):
     class Config:
         from_attributes = True
 
+
+from pydantic import BaseModel
+from typing import List
+
+class AtividadeComAnaliseSchema(BaseModel):
+    atividades: List[AtividadeRespostaSchema]
+    analise_ia: str
+
 class AtividadeExistenteResponseSchema(BaseModel):
     codigo_atividade: str
     nome_atividade: str
