@@ -42,7 +42,7 @@ class service_atividades:
     # ==========================================
     # BUSCAR ATIVIDADES
     # ==========================================
-    def buscar_atividades(self):
+    def buscar_todas_atividades(self):
 
         return self.db.query(
             model_atividades

@@ -1,6 +1,5 @@
 - atualizar os dados dos demais usuarios se for usuario root
 - desativar um usuario caso seja um usuario do tipo root
-- colcoar verificação do middlweare em todas as rotas
 - recuperar funcional apenas por token
 
 - garantir os testes do swegger API
