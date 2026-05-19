@@ -1,11 +1,13 @@
-- logar atraves de usuario e senha e retornar um token
+- logar atraves de usuario e senha e retornar um token (garantir anti brute-force)
 - atualizar os dados dos demais usuarios se for usuario root
 - atualizar lista de tipos de exercicios se for usuario root
 - desativar um usuario caso seja um usuario do tipo root
-- garantir os testes unitarios 
 - colcoar verificação do middlweare em todas as rotas
 - recuperar funcional apenas por token
+
+- garantir os testes do swegger API
+- garantir os testes unitarios 
 - atualizar requirements.txt
 - garantir que a doc esteja devidamente alinhada
-- garantir que o swegger esteja completamente alinhado
+
 
