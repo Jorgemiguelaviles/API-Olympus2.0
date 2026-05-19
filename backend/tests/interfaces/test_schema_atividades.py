@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from src.interfaces.schema_atividades import (
+from backend.src.interfaces.schemas.schema_atividades import (
     AtividadeCriacaoSchema,
     AtividadeRespostaSchema,
     AtividadeExistenteResponseSchema

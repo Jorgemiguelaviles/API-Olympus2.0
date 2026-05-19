@@ -1,15 +1,24 @@
-from datetime import datetime
-from typing import List
+# src/routes/routes_atividades.py
 
-from fastapi import APIRouter, Depends, status, Path
+from datetime import datetime
+
+from fastapi import (
+    APIRouter,
+    Depends
+)
+
 from sqlalchemy.orm import Session
 
 from src.config.config_banco import get_db
 
-from src.interfaces.schema_atividades import (
-    AtividadeCriacaoSchema,
-    AtividadeRespostaSchema,
-    AtividadeComAnaliseSchema
+from src.interfaces.schemas.schema_atividades import (
+    AtividadeCriacaoSchema
+)
+
+from src.interfaces.docs.docs_atividades import (
+    DOC_CADASTRAR_ATIVIDADE,
+    DOC_BUSCAR_POR_FUNCIONAL,
+    DOC_BUSCAR_TODAS
 )
 
 from src.contollers.atividades_realizadas import (
@@ -24,39 +33,12 @@ roteador_atividades_praticadas = APIRouter(
 
 
 # ==========================================
-# Cadastro de atividade realizada
+# Cadastro
 # ==========================================
 
 @roteador_atividades_praticadas.post(
     "/",
-    response_model=AtividadeRespostaSchema,
-    status_code=status.HTTP_201_CREATED,
-    summary="Cadastrar atividade realizada",
-    description="Cria um novo registro de atividade física realizada.",
-    responses={
-        201: {
-            "description": "Atividade cadastrada com sucesso.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "funcional": 123456789,
-                        "codigo_atividade": 1,
-                        "descricao": "Treino de peito",
-                        "data_hora": "2026-05-17T14:30:00"
-                    }
-                }
-            }
-        },
-        400: {
-            "description": "Dados inválidos."
-        },
-        404: {
-            "description": "Atividade não encontrada."
-        },
-        500: {
-            "description": "Erro interno ao consultar atividades."
-        }
-    }
+    **DOC_CADASTRAR_ATIVIDADE
 )
 def cadastrar_atividade(
     payload: AtividadeCriacaoSchema,
@@ -64,9 +46,13 @@ def cadastrar_atividade(
 ):
 
     nova_atividade = {
+
         "funcional": payload.funcional,
+
         "codigo_atividade": payload.codigo_atividade,
+
         "descricao": payload.descricao,
+
         "data_hora": datetime.now()
     }
 
@@ -80,96 +66,32 @@ def cadastrar_atividade(
 
 
 # ==========================================
-# Buscar atividades por funcional
+# Buscar por funcional
 # ==========================================
 
 @roteador_atividades_praticadas.get(
     "/{funcional}",
-    response_model=AtividadeComAnaliseSchema,
-    summary="Buscar atividades por funcional",
-    description="Retorna todas as atividades vinculadas a um funcional.",
-    responses={
-        200: {
-            "description": "Atividades encontradas com sucesso.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "atividades": [
-                            {
-                                "funcional": 123456789,
-                                "codigo_atividade": 1,
-                                "descricao": "Treino de peito",
-                                "data_hora": "2026-05-17T14:30:00"
-                            }
-                        ],
-                        "analise_ia": "Análise gerada pela IA sobre as atividades realizadas."
-                    }
-                }
-            }
-        },
-        404: {
-            "description": "Nenhuma atividade encontrada."
-        },
-        500: {
-            "description": "Erro interno ao consultar atividades."
-        }
-    }
+    **DOC_BUSCAR_POR_FUNCIONAL
 )
 def buscar_por_funcional(
-    funcional: int = Path(
-        ...,
-        description="Código funcional com 9 dígitos.",
-        example=123456789
-    ),
+    funcional: int,
     db: Session = Depends(get_db)
 ):
 
-    response = controller_atividades_realizadas(
+    return controller_atividades_realizadas(
         db
     ).buscar_por_funcional(
         funcional
     )
 
-    print('response', response)
-
-    return response
-
 
 # ==========================================
-# Buscar todas as atividades realizadas
+# Buscar todas
 # ==========================================
 
 @roteador_atividades_praticadas.get(
     "/",
-    response_model=List[AtividadeRespostaSchema],
-    summary="Buscar todas as atividades realizadas",
-    description="Retorna todas as atividades físicas registradas.",
-    responses={
-        200: {
-            "description": "Lista de atividades recuperada com sucesso.",
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "funcional": 123456789,
-                            "codigo_atividade": 1,
-                            "descricao": "Treino de peito",
-                            "data_hora": "2026-05-17T14:30:00"
-                        },
-                        {
-                            "funcional": 987654321,
-                            "codigo_atividade": 3,
-                            "descricao": "Treino funcional",
-                            "data_hora": "2026-05-17T20:15:00"
-                        }
-                    ]
-                }
-            }
-        },
-        404: {
-            "description": "Nenhuma atividade encontrada."
-        }
-    }
+    **DOC_BUSCAR_TODAS
 )
 def buscar_todas_atividades(
     db: Session = Depends(get_db)

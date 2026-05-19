@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from src.config.config_banco import get_db
 
 
-from src.interfaces.schema_atividades import (
+from src.interfaces.schemas.schema_atividades import (
     AtividadeExistenteResponseSchema
 )
 from src.contollers.atividades_existentes import controller_atividade_existente

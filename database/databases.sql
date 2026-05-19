@@ -2,13 +2,18 @@ CREATE DATABASE olympius;
 USE olympius;
 
 -- Tabela de usuários
- CREATE TABLE usuarios (
-     funcional BIGINT AUTO_INCREMENT PRIMARY KEY,
-     usuario VARCHAR(50) NOT NULL UNIQUE,
-     senha_hash VARCHAR(255) NOT NULL,
-     nome VARCHAR(100) NOT NULL,
-     usuario_root BOOLEAN NOT NULL,
-     usuario_ativado BOOLEAN NOT NULL
+CREATE TABLE usuarios (
+    funcional BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+
+    senha_hash VARCHAR(255) NOT NULL,
+
+    nome VARCHAR(100) NOT NULL,
+
+    usuario_root BOOLEAN NOT NULL DEFAULT FALSE,
+
+    usuario_ativado BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 -- Catálogo de atividades possíveis
