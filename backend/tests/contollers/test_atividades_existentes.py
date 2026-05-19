@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 from fastapi import HTTPException
 
-from src.contollers.atividades_existentes import (
+from src.contollers.controller_atividades_existentes import (
     controller_atividade_existente
 )
 

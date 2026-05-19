@@ -21,7 +21,7 @@ from src.interfaces.docs.docs_atividades import (
     DOC_BUSCAR_TODAS
 )
 
-from src.contollers.atividades_realizadas import (
+from src.contollers.controller_atividades_realizadas import (
     controller_atividades_realizadas
 )
 

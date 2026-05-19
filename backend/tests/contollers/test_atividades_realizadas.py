@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 from fastapi import HTTPException
 
-from src.contollers.atividades_realizadas import (
+from src.contollers.controller_atividades_realizadas import (
     controller_atividades_realizadas
 )
 

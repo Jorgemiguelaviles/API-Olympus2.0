@@ -10,7 +10,7 @@ from src.config.config_banco import get_db
 from src.interfaces.schemas.schema_atividades import (
     AtividadeExistenteResponseSchema
 )
-from src.contollers.atividades_existentes import controller_atividade_existente
+from src.contollers.controller_atividades_existentes import controller_atividade_existente
 
 
 
