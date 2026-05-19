@@ -1,47 +1,63 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel
+from typing import Optional, List
 from datetime import datetime
 
 
-class AtividadeCriacaoSchema(BaseModel):
-    funcional: int = Field(
-        ...,
-        example=12345,
-        description="Identificador funcional do usuário"
-    )
-
-    codigo_atividade: str = Field(
-        ...,
-        example='RUN',
-        description="Código da atividade física"
-    )
-
-    descricao: Optional[str] = Field(
-        None,
-        example="Corrida de 5km no parque",
-        description="Descrição opcional da atividade realizada"
-    )
-
-
+# ==========================================
+# RESPOSTA ATIVIDADE REALIZADA
+# ==========================================
 class AtividadeRespostaSchema(BaseModel):
+
     funcional: int
+
     codigo_atividade: str
-    descricao: Optional[str]
+
+    nome_atividade: Optional[str]
+
     data_hora: datetime
 
     class Config:
         from_attributes = True
 
 
-from pydantic import BaseModel
-from typing import List
-
+# ==========================================
+# RESPOSTA COM IA
+# ==========================================
 class AtividadeComAnaliseSchema(BaseModel):
+
     atividades: List[AtividadeRespostaSchema]
+
     analise_ia: str
 
+
+# ==========================================
+# RESPOSTA ATIVIDADES DISPONÍVEIS
+# ==========================================
 class AtividadeExistenteResponseSchema(BaseModel):
+
     codigo_atividade: str
+
+    nome_atividade: str
+
+    class Config:
+        from_attributes = True
+
+
+# ==========================================
+# CRIAÇÃO NOVA OPÇÃO
+# ==========================================
+class AtividadeCriacaoOpcaoSchema(BaseModel):
+
+    descricao: str
+
+
+# ==========================================
+# RESPOSTA NOVA OPÇÃO
+# ==========================================
+class AtividadeOpcaoResponseSchema(BaseModel):
+
+    codigo_atividade: str
+
     nome_atividade: str
 
     class Config:

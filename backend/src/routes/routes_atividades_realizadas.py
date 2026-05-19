@@ -11,11 +11,11 @@ from sqlalchemy.orm import Session
 
 from src.config.config_banco import get_db
 
-from src.interfaces.schemas.schema_atividades import (
+from src.interfaces.schemas.schema_atividaddes_realizadas import (
     AtividadeCriacaoSchema
 )
 
-from src.interfaces.docs.docs_atividades import (
+from src.interfaces.docs.docs_atividades_realizadas import (
     DOC_CADASTRAR_ATIVIDADE,
     DOC_BUSCAR_POR_FUNCIONAL,
     DOC_BUSCAR_TODAS

@@ -3,9 +3,11 @@
 from fastapi import status
 
 from src.interfaces.schemas.schema_usuarios import (
-    UsuarioCriacaoSchema,
+    UsuarioListagemSchema,
     UsuarioRespostaSchema
 )
+
+
 
 DOC_CADASTRAR_USUARIO = {
     "response_model": UsuarioRespostaSchema,
@@ -49,10 +51,6 @@ DOC_CADASTRAR_USUARIO = {
 
 
 
-from fastapi import status
-
-from src.interfaces.schemas.schema_usuarios import UsuarioListagemSchema
-
 
 DOC_LISTAR_USUARIOS = {
     "response_model": list[UsuarioListagemSchema],
@@ -85,6 +83,33 @@ DOC_LISTAR_USUARIOS = {
 
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Erro interno ao listar usuários."
+        }
+    }
+}
+
+DOC_LOGIN_USUARIO = {
+
+    "summary": "Login do usuário",
+
+    "description": (
+        "Autentica usuário e retorna JWT."
+    ),
+
+    "responses": {
+        200: {
+            "description": "Login realizado com sucesso.",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "access_token": "eyJhbGciOiJSUzI1NiIs...",
+                        "token_type": "bearer"
+                    }
+                }
+            }
+        },
+
+        401: {
+            "description": "Credenciais inválidas."
         }
     }
 }

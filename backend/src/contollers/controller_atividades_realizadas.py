@@ -95,7 +95,7 @@ class controller_atividades_realizadas:
                 "API_KEY_GEMINI"
             )
 
-            if chave_api:
+            if chave_api and atividades:
                 resultado_ia = service_gemini(chave_api).analisa_dados(
                     dados_usuario=descricoes,
                     prompt_usuario=(
@@ -105,12 +105,7 @@ class controller_atividades_realizadas:
                 )
             
             else:
-                resultado_ia = "API_KEY_GEMINI não configurada. Análise de IA não realizada."
-
-            print('resultado_ia:', resultado_ia)
-            print('atividades', atividades)
-
-
+                resultado_ia = "API_KEY_GEMINI não configurada. ou nenhuma atividade encontrada."
 
             if not atividades:
 

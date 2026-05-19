@@ -28,29 +28,3 @@ class AtividadeCriacaoSchema(BaseModel):
         None,
         example="Corrida de 5km"
     )
-
-
-# ==========================================
-# Resposta da atividade
-# ==========================================
-
-class AtividadeRespostaSchema(BaseModel):
-
-    funcional: int
-    codigo_atividade: str
-    descricao: Optional[str]
-    data_hora: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# ==========================================
-# Resposta com IA
-# ==========================================
-
-class AtividadeComAnaliseSchema(BaseModel):
-
-    atividades: List[AtividadeRespostaSchema]
-
-    analise_ia: str

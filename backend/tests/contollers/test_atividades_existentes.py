@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 from fastapi import HTTPException
 
-from src.contollers.controller_atividades_existentes import (
+from src.contollers.controller_atividades import (
     controller_atividade_existente
 )
 
@@ -39,7 +39,7 @@ def test_gerencia_atividades_sucesso():
             fake_db
         )
 
-        result = controller.gerencia_atividades()
+        result = controller.busca_atividades()
 
         assert result == fake_response
 
@@ -65,7 +65,7 @@ def test_gerencia_atividades_sem_resultados():
 
         try:
 
-            controller.gerencia_atividades()
+            controller.busca_atividades()
 
         except HTTPException as erro:
 
@@ -101,7 +101,7 @@ def test_gerencia_atividades_http_exception():
 
         try:
 
-            controller.gerencia_atividades()
+            controller.busca_atividades()
 
         except HTTPException as erro:
 
@@ -134,7 +134,7 @@ def test_gerencia_atividades_erro_interno():
 
         try:
 
-            controller.gerencia_atividades()
+            controller.busca_atividades()
 
         except HTTPException as erro:
 

@@ -3,16 +3,20 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-
 from src.config.config_banco import get_db
 
+from src.interfaces.docs.docs_atividades import (
+    DOC_CADASTRAR_OPCAO_ATIVIDADE
+)
 
 from src.interfaces.schemas.schema_atividades import (
+    AtividadeCriacaoOpcaoSchema,
     AtividadeExistenteResponseSchema
 )
-from src.contollers.controller_atividades_existentes import controller_atividade_existente
 
-
+from src.contollers.controller_atividades import (
+    controller_atividade_existente
+)
 
 roteador_atividades = APIRouter(
     prefix="/atividades",
@@ -20,8 +24,9 @@ roteador_atividades = APIRouter(
 )
 
 
-
-
+# ==========================================
+# BUSCAR OPÇÕES
+# ==========================================
 @roteador_atividades.get(
     "/opcoes",
     response_model=List[AtividadeExistenteResponseSchema],
@@ -43,5 +48,30 @@ def buscar_opcoes_atividades(
     db: Session = Depends(get_db)
 ):
 
-    return controller_atividade_existente(db).gerencia_atividades()
+    return controller_atividade_existente(
+        db
+    ).busca_atividades()
 
+
+# ==========================================
+# CADASTRAR OPÇÃO
+# ==========================================
+@roteador_atividades.post(
+    "/opcoes",
+    status_code=201,
+    **DOC_CADASTRAR_OPCAO_ATIVIDADE
+)
+def cadastrar_opcao_atividade(
+    payload: AtividadeCriacaoOpcaoSchema,
+    db: Session = Depends(get_db)
+):
+
+    nova_atividade = {
+        "descricao": payload.descricao
+    }
+
+    return controller_atividade_existente(
+        db
+    ).cadastrar_atividade(
+        nova_atividade
+    )

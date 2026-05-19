@@ -1,10 +1,9 @@
-# src/routes/routes_usuarios.py
-
 from fastapi import (
     APIRouter,
     Depends,
     Query,
-    status
+    status,
+    HTTPException
 )
 
 from sqlalchemy.orm import Session
@@ -12,16 +11,22 @@ from sqlalchemy.orm import Session
 from src.config.config_banco import get_db
 
 from src.interfaces.schemas.schema_usuarios import (
-    UsuarioCriacaoSchema
+    UsuarioCriacaoSchema,
+    UsuarioLoginSchema
 )
 
 from src.interfaces.docs.docs_usuarios import (
-    DOC_CADASTRAR_USUARIO
+    DOC_CADASTRAR_USUARIO,
+    DOC_LOGIN_USUARIO
 )
 
 from src.contollers.controller_usuarios import (
     controller_usuarios
 )
+
+from src.services.service_seguranca.jwt import create_access_token
+
+
 
 roteador_usuarios = APIRouter(
     prefix="/usuarios",
@@ -42,22 +47,16 @@ def cadastrar_usuario(
     db: Session = Depends(get_db)
 ):
 
-    novo_usuario = {
+    return controller_usuarios(db).cadastrar_usuario({
         "usuario": payload.usuario,
         "senha": payload.senha,
         "nome": payload.nome
-    }
-
-    response = controller_usuarios(
-        db
-    ).cadastrar_usuario(
-        novo_usuario
-    )
-
-    return response
+    })
 
 
-
+# ==========================================
+# Listar usuários
+# ==========================================
 @roteador_usuarios.get("/listar")
 def listar_usuarios(
     page: int = Query(1, ge=1),
@@ -65,3 +64,17 @@ def listar_usuarios(
 ):
 
     return controller_usuarios(db).listar_usuarios(page)
+
+@roteador_usuarios.post(
+    "/login",
+    **DOC_LOGIN_USUARIO
+)
+def login_usuario(
+    payload: UsuarioLoginSchema,
+    db: Session = Depends(get_db)
+):
+
+    return controller_usuarios(db).login({
+        "usuario": payload.usuario,
+        "senha": payload.senha
+    })

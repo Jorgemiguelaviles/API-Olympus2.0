@@ -1,5 +1,7 @@
 # src/models/model_atividades.py
 
+import uuid
+
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
@@ -11,7 +13,8 @@ class model_atividades(Base):
 
     codigo_atividade = Column(
         String(36),
-        primary_key=True
+        primary_key=True,
+        default=lambda: str(uuid.uuid4())
     )
 
     nome_atividade = Column(

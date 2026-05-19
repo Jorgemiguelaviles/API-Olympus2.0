@@ -41,3 +41,7 @@ class UsuarioListagemSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UsuarioLoginSchema(BaseModel):
+    usuario: str = Field(..., example="jorge@gmail.com")
+    senha: str = Field(..., example="123456")

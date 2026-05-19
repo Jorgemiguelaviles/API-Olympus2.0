@@ -1,6 +1,4 @@
-- logar atraves de usuario e senha e retornar um token (garantir anti brute-force)
 - atualizar os dados dos demais usuarios se for usuario root
-- atualizar lista de tipos de exercicios se for usuario root
 - desativar um usuario caso seja um usuario do tipo root
 - colcoar verificação do middlweare em todas as rotas
 - recuperar funcional apenas por token
