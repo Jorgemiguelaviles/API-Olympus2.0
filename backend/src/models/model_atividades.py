@@ -1,4 +1,6 @@
-from sqlalchemy import Column, BigInteger, String
+# src/models/model_atividades.py
+
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 from src.config.config_banco import Base
@@ -8,9 +10,8 @@ class model_atividades(Base):
     __tablename__ = "atividade"
 
     codigo_atividade = Column(
-        BigInteger,
-        primary_key=True,
-        autoincrement=True
+        String(36),
+        primary_key=True
     )
 
     nome_atividade = Column(

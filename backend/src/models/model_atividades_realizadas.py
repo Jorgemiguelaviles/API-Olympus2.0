@@ -1,4 +1,13 @@
-from sqlalchemy import Column, BigInteger, String, TIMESTAMP, ForeignKey
+# src/models/model_atividades_realizadas.py
+
+from sqlalchemy import (
+    Column,
+    BigInteger,
+    String,
+    TIMESTAMP,
+    ForeignKey
+)
+
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -16,11 +25,12 @@ class model_atividades_realizadas(Base):
 
     funcional = Column(
         BigInteger,
+        ForeignKey("usuarios.funcional"),
         nullable=False
     )
 
     codigo_atividade = Column(
-        BigInteger,
+        String(36),
         ForeignKey("atividade.codigo_atividade"),
         nullable=False
     )
@@ -35,7 +45,18 @@ class model_atividades_realizadas(Base):
         String(255)
     )
 
+    # ==========================================
+    # Relacionamento com atividade
+    # ==========================================
     atividade = relationship(
         "model_atividades",
+        back_populates="atividades_realizadas"
+    )
+
+    # ==========================================
+    # Relacionamento com usuário
+    # ==========================================
+    usuario = relationship(
+        "model_usuarios",
         back_populates="atividades_realizadas"
     )
