@@ -11,7 +11,7 @@ class service_usuarios:
         self.db = db
 
     # ==========================================
-    # Criar usuário
+    # CRIAR USUÁRIO
     # ==========================================
     def salvar(self, payload: dict):
 
@@ -47,7 +47,7 @@ class service_usuarios:
             )
 
     # ==========================================
-    # Listar usuários (paginação)
+    # LISTAR USUÁRIOS
     # ==========================================
     def listar_usuarios(self, page: int):
 
@@ -74,3 +74,93 @@ class service_usuarios:
             }
             for u in usuarios
         ]
+
+    # ==========================================
+    # ALTERAR CONFIGURAÇÃO USUÁRIO
+    # ==========================================
+    def alterar_configuracao_usuario(
+        self,
+        funcional: int,
+        campo: str
+    ):
+
+        try:
+
+            usuario = self.db.query(
+                model_usuarios
+            ).filter(
+                model_usuarios.funcional == funcional
+            ).first()
+
+            # alterna boolean
+            valor_atual = getattr(usuario, campo)
+
+            setattr(
+                usuario,
+                campo,
+                not valor_atual
+            )
+
+            self.db.commit()
+            self.db.refresh(usuario)
+
+            return {
+                "message": f"{campo} atualizado com sucesso.",
+                "funcional": usuario.funcional,
+                campo: getattr(usuario, campo)
+            }
+
+        except SQLAlchemyError as erro:
+
+            self.db.rollback()
+
+            raise Exception(
+                f"Erro ao alterar configuração do usuário: {str(erro)}"
+            )
+
+    # ==========================================
+    # ATUALIZAR USUÁRIO
+    # ==========================================
+    def atualizar_usuario(
+        self,
+        funcional: int,
+        payload: dict
+    ):
+
+        try:
+
+            usuario = self.db.query(
+                model_usuarios
+            ).filter(
+                model_usuarios.funcional == funcional
+            ).first()
+
+            # ==========================================
+            # UPDATE DINÂMICO
+            # ==========================================
+            for chave, valor in payload.items():
+
+                setattr(
+                    usuario,
+                    chave,
+                    valor
+                )
+
+            self.db.commit()
+            self.db.refresh(usuario)
+
+            return {
+                "funcional": usuario.funcional,
+                "usuario": usuario.usuario,
+                "nome": usuario.nome,
+                "usuario_root": usuario.usuario_root,
+                "usuario_ativado": usuario.usuario_ativado
+            }
+
+        except SQLAlchemyError as erro:
+
+            self.db.rollback()
+
+            raise Exception(
+                f"Erro ao atualizar usuário: {str(erro)}"
+            )

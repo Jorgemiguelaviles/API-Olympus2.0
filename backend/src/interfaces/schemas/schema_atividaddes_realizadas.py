@@ -12,12 +12,6 @@ from pydantic import BaseModel, Field
 
 class AtividadeCriacaoSchema(BaseModel):
 
-    funcional: int = Field(
-        ...,
-        example=123456789,
-        description="Código funcional do usuário"
-    )
-
     codigo_atividade: str = Field(
         ...,
         example="RUN",

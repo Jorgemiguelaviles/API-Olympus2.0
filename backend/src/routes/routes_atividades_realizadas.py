@@ -1,13 +1,12 @@
-# src/routes/routes_atividades.py
-
-from datetime import datetime
-
 from fastapi import (
     APIRouter,
-    Depends
+    Depends,
+    Request
 )
 
 from sqlalchemy.orm import Session
+
+from datetime import datetime
 
 from src.config.config_banco import get_db
 
@@ -33,21 +32,23 @@ roteador_atividades_praticadas = APIRouter(
 
 
 # ==========================================
-# Cadastro
+# CADASTRO
 # ==========================================
-
 @roteador_atividades_praticadas.post(
     "/",
     **DOC_CADASTRAR_ATIVIDADE
 )
 def cadastrar_atividade(
     payload: AtividadeCriacaoSchema,
+    request: Request,
     db: Session = Depends(get_db)
 ):
 
+    user = request.state.user
+
     nova_atividade = {
 
-        "funcional": payload.funcional,
+        "funcional": user["funcional"],
 
         "codigo_atividade": payload.codigo_atividade,
 
@@ -66,29 +67,29 @@ def cadastrar_atividade(
 
 
 # ==========================================
-# Buscar por funcional
+# BUSCAR MINHAS ATIVIDADES
 # ==========================================
-
 @roteador_atividades_praticadas.get(
-    "/{funcional}",
+    "/minhas",
     **DOC_BUSCAR_POR_FUNCIONAL
 )
-def buscar_por_funcional(
-    funcional: int,
+def buscar_minhas_atividades(
+    request: Request,
     db: Session = Depends(get_db)
 ):
+
+    user = request.state.user
 
     return controller_atividades_realizadas(
         db
     ).buscar_por_funcional(
-        funcional
+        user["funcional"]
     )
 
 
 # ==========================================
-# Buscar todas
+# BUSCAR TODAS
 # ==========================================
-
 @roteador_atividades_praticadas.get(
     "/",
     **DOC_BUSCAR_TODAS

@@ -1,7 +1,7 @@
 # src/interfaces/schemas/schema_usuarios.py
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
 # ==========================================
 # Cadastro
@@ -45,3 +45,40 @@ class UsuarioListagemSchema(BaseModel):
 class UsuarioLoginSchema(BaseModel):
     usuario: str = Field(..., example="jorge@gmail.com")
     senha: str = Field(..., example="123456")
+
+
+
+
+
+# ==========================================
+# ALTERAR ROOT
+# ==========================================
+class UsuarioAlterarRootSchema(BaseModel):
+
+    funcional: int
+
+    usuario_root: bool
+
+
+# ==========================================
+# ALTERAR STATUS
+# ==========================================
+class UsuarioAlterarStatusSchema(BaseModel):
+
+    funcional: int
+
+    usuario_ativado: bool
+
+
+# ==========================================
+# ATUALIZAR DADOS
+# ==========================================
+class UsuarioAtualizacaoSchema(BaseModel):
+
+    funcional: int
+
+    nome: Optional[str] = None
+
+    usuario: Optional[EmailStr] = None
+
+    senha: Optional[str] = None

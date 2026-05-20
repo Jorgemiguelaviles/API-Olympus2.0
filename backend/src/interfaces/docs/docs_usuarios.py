@@ -113,3 +113,54 @@ DOC_LOGIN_USUARIO = {
         }
     }
 }
+
+
+# ==========================================
+# ALTERAR ROOT
+# ==========================================
+DOC_ALTERAR_ROOT = {
+    "summary": "Alterar permissão ROOT",
+    "description": "Ativa ou remove permissão ROOT do usuário.",
+    "responses": {
+        200: {
+            "description": "Permissão alterada com sucesso."
+        },
+        404: {
+            "description": "Usuário não encontrado."
+        }
+    }
+}
+
+
+# ==========================================
+# ALTERAR STATUS
+# ==========================================
+DOC_ALTERAR_STATUS = {
+    "summary": "Ativar ou desativar usuário",
+    "description": "Ativa ou desativa acesso do usuário.",
+    "responses": {
+        200: {
+            "description": "Status alterado com sucesso."
+        },
+        404: {
+            "description": "Usuário não encontrado."
+        }
+    }
+}
+
+
+# ==========================================
+# ATUALIZAR USUÁRIO
+# ==========================================
+DOC_ATUALIZAR_USUARIO = {
+    "summary": "Atualizar usuário",
+    "description": "Atualiza nome, email e senha do usuário.",
+    "responses": {
+        200: {
+            "description": "Usuário atualizado com sucesso."
+        },
+        404: {
+            "description": "Usuário não encontrado."
+        }
+    }
+}
