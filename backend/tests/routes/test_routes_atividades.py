@@ -1,4 +1,6 @@
-from unittest.mock import patch
+# tests/routes/test_routes_atividades.py
+
+from unittest.mock import MagicMock, patch
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -9,45 +11,39 @@ from src.routes.routes_atividades import (
 
 
 # ==========================================
-# APP DE TESTE
+# APP
 # ==========================================
-
 app = FastAPI()
 
 app.include_router(
     roteador_atividades
 )
 
-client = TestClient(
-    app
-)
+client = TestClient(app)
 
 
 # ==========================================
-# GET /atividades/opcoes
+# BUSCAR OPÇÕES
 # ==========================================
-
 @patch(
     "src.routes.routes_atividades.controller_atividade_existente"
 )
 def test_buscar_opcoes_atividades(
-    mock_controller
+    mock_controller_class
 ):
 
-    mock_instance = (
-        mock_controller.return_value
-    )
+    mock_controller = MagicMock()
 
-    mock_instance.gerencia_atividades.return_value = [
+    mock_controller.busca_atividades.return_value = [
         {
-            "codigo_atividade": "1",
-            "nome_atividade": "Corrida"
-        },
-        {
-            "codigo_atividade": "2",
+            "codigo_atividade": "MUSC-001",
             "nome_atividade": "Musculação"
         }
     ]
+
+    mock_controller_class.return_value = (
+        mock_controller
+    )
 
     response = client.get(
         "/atividades/opcoes"
@@ -57,43 +53,88 @@ def test_buscar_opcoes_atividades(
 
     body = response.json()
 
-    assert len(body) == 2
+    assert len(body) == 1
 
-    assert body[0]["codigo_atividade"] == "1"
-    assert body[0]["nome_atividade"] == "Corrida"
+    assert (
+        body[0]["codigo_atividade"]
+        == "MUSC-001"
+    )
 
-    assert body[1]["codigo_atividade"] == "2"
-    assert body[1]["nome_atividade"] == "Musculação"
+    mock_controller.busca_atividades.assert_called_once()
 
 
 # ==========================================
-# Controller chamado
+# CADASTRAR OPÇÃO
 # ==========================================
-
 @patch(
     "src.routes.routes_atividades.controller_atividade_existente"
 )
-def test_controller_foi_chamado(
-    mock_controller
+def test_cadastrar_opcao_atividade(
+    mock_controller_class
 ):
 
-    mock_instance = (
-        mock_controller.return_value
+    mock_controller = MagicMock()
+
+    mock_controller.cadastrar_atividade.return_value = {
+        "codigo_atividade": "NAT-001",
+        "nome_atividade": "Natação"
+    }
+
+    mock_controller_class.return_value = (
+        mock_controller
     )
 
-    mock_instance.gerencia_atividades.return_value = [
-        {
-            "codigo_atividade": "1",
-            "nome_atividade": "Corrida"
+    response = client.post(
+        "/atividades/opcoes",
+        json={
+            "descricao": "Natação"
         }
-    ]
-
-    response = client.get(
-        "/atividades/opcoes"
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 201
 
-    mock_controller.assert_called_once()
+    body = response.json()
 
-    mock_instance.gerencia_atividades.assert_called_once()
+    assert (
+        body["codigo_atividade"]
+        == "NAT-001"
+    )
+
+    assert (
+        body["nome_atividade"]
+        == "Natação"
+    )
+
+    mock_controller.cadastrar_atividade.assert_called_once_with(
+        {
+            "descricao": "Natação"
+        }
+    )
+
+
+# ==========================================
+# PAYLOAD INVÁLIDO
+# ==========================================
+def test_cadastrar_opcao_payload_invalido():
+
+    response = client.post(
+        "/atividades/opcoes",
+        json={
+            "descricao": "A"
+        }
+    )
+
+    assert response.status_code == 422
+
+
+# ==========================================
+# CAMPO OBRIGATÓRIO
+# ==========================================
+def test_cadastrar_opcao_sem_descricao():
+
+    response = client.post(
+        "/atividades/opcoes",
+        json={}
+    )
+
+    assert response.status_code == 422

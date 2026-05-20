@@ -1,166 +1,113 @@
-from datetime import datetime
+# tests/interfaces/test_schema_atividades.py
 
 import pytest
 from pydantic import ValidationError
 
-from backend.src.interfaces.schemas.schema_atividades import (
-    AtividadeCriacaoSchema,
-    AtividadeRespostaSchema,
-    AtividadeExistenteResponseSchema
+from src.interfaces.schemas.schema_atividades import (
+    AtividadeExistenteResponseSchema,
+    AtividadeCriacaoOpcaoSchema,
+    AtividadeOpcaoResponseSchema
 )
 
 
-# ====================================================
-# AtividadeCriacaoSchema
-# ====================================================
+# ==========================================
+# ATIVIDADE EXISTENTE RESPONSE
+# ==========================================
+def test_atividade_existente_response_schema_success():
 
-def test_criacao_schema_valido():
-
-    payload = AtividadeCriacaoSchema(
-        funcional=123456789,
-        codigo_atividade="RUN",
-        descricao="Corrida"
+    schema = AtividadeExistenteResponseSchema(
+        codigo_atividade="musculacao-001",
+        nome_atividade="Musculação"
     )
 
-    assert payload.funcional == 123456789
-    assert payload.codigo_atividade == "RUN"
-    assert payload.descricao == "Corrida"
+    assert schema.codigo_atividade == "musculacao-001"
+    assert schema.nome_atividade == "Musculação"
 
 
-def test_criacao_schema_sem_descricao():
+def test_atividade_existente_response_schema_missing_fields():
 
-    payload = AtividadeCriacaoSchema(
-        funcional=123456789,
-        codigo_atividade="RUN"
-    )
-
-    assert payload.descricao is None
-
-
-def test_criacao_schema_sem_funcional():
-
-    with pytest.raises(
-        ValidationError
-    ):
-
-        AtividadeCriacaoSchema(
-            codigo_atividade="RUN"
-        )
-
-
-def test_criacao_schema_tipo_invalido():
-
-    with pytest.raises(
-        ValidationError
-    ):
-
-        AtividadeCriacaoSchema(
-            funcional="abc",
-            codigo_atividade="RUN"
-        )
-
-
-# ====================================================
-# AtividadeRespostaSchema
-# ====================================================
-
-def test_resposta_schema_valido():
-
-    now = datetime.now()
-
-    payload = AtividadeRespostaSchema(
-        funcional=123456789,
-        codigo_atividade="RUN",
-        descricao="Corrida",
-        data_hora=now
-    )
-
-    assert payload.funcional == 123456789
-    assert payload.codigo_atividade == "RUN"
-    assert payload.data_hora == now
-
-
-def test_resposta_schema_model_dump():
-
-    now = datetime.now()
-
-    payload = AtividadeRespostaSchema(
-        funcional=123456789,
-        codigo_atividade="RUN",
-        descricao="Teste",
-        data_hora=now
-    )
-
-    data = payload.model_dump()
-
-    assert data["funcional"] == 123456789
-    assert data["codigo_atividade"] == "RUN"
-
-
-# ====================================================
-# from_attributes
-# ====================================================
-
-class FakeAtividade:
-
-    funcional = 123456789
-    codigo_atividade = "RUN"
-    descricao = "Corrida"
-    data_hora = datetime.now()
-
-
-def test_resposta_schema_from_attributes():
-
-    obj = FakeAtividade()
-
-    schema = AtividadeRespostaSchema.model_validate(
-        obj
-    )
-
-    assert schema.funcional == 123456789
-    assert schema.codigo_atividade == "RUN"
-
-
-# ====================================================
-# AtividadeExistenteResponseSchema
-# ====================================================
-
-def test_atividade_existente_schema():
-
-    payload = AtividadeExistenteResponseSchema(
-        codigo_atividade="RUN",
-        nome_atividade="Corrida"
-    )
-
-    assert payload.codigo_atividade == "RUN"
-    assert payload.nome_atividade == "Corrida"
-
-
-def test_atividade_existente_schema_campo_obrigatorio():
-
-    with pytest.raises(
-        ValidationError
-    ):
+    with pytest.raises(ValidationError):
 
         AtividadeExistenteResponseSchema(
-            codigo_atividade="RUN"
+            codigo_atividade="musculacao-001"
         )
 
 
-class FakeAtividadeExistente:
+def test_atividade_existente_response_schema_json_schema():
 
-    codigo_atividade = "RUN"
-    nome_atividade = "Corrida"
+    schema = AtividadeExistenteResponseSchema.model_json_schema()
+
+    properties = schema["properties"]
+
+    assert properties["codigo_atividade"]["example"] == "musculacao-001"
+    assert properties["nome_atividade"]["example"] == "Musculação"
 
 
-def test_atividade_existente_from_attributes():
+# ==========================================
+# ATIVIDADE CRIACAO OPCAO
+# ==========================================
+def test_atividade_criacao_opcao_schema_success():
 
-    obj = FakeAtividadeExistente()
-
-    schema = (
-        AtividadeExistenteResponseSchema
-        .model_validate(obj)
+    schema = AtividadeCriacaoOpcaoSchema(
+        descricao="Natação"
     )
 
-    assert schema.codigo_atividade == "RUN"
-    assert schema.nome_atividade == "Corrida"
+    assert schema.descricao == "Natação"
+
+
+def test_atividade_criacao_opcao_schema_min_length():
+
+    with pytest.raises(ValidationError):
+
+        AtividadeCriacaoOpcaoSchema(
+            descricao="AB"
+        )
+
+
+def test_atividade_criacao_opcao_schema_missing_field():
+
+    with pytest.raises(ValidationError):
+
+        AtividadeCriacaoOpcaoSchema()
+
+
+def test_atividade_criacao_opcao_schema_json_schema():
+
+    schema = AtividadeCriacaoOpcaoSchema.model_json_schema()
+
+    properties = schema["properties"]
+
+    assert properties["descricao"]["example"] == "Natação"
+
+
+# ==========================================
+# ATIVIDADE OPCAO RESPONSE
+# ==========================================
+def test_atividade_opcao_response_schema_success():
+
+    schema = AtividadeOpcaoResponseSchema(
+        codigo_atividade="natacao-001",
+        nome_atividade="Natação"
+    )
+
+    assert schema.codigo_atividade == "natacao-001"
+    assert schema.nome_atividade == "Natação"
+
+
+def test_atividade_opcao_response_schema_missing_fields():
+
+    with pytest.raises(ValidationError):
+
+        AtividadeOpcaoResponseSchema(
+            codigo_atividade="natacao-001"
+        )
+
+
+def test_atividade_opcao_response_schema_json_schema():
+
+    schema = AtividadeOpcaoResponseSchema.model_json_schema()
+
+    properties = schema["properties"]
+
+    assert properties["codigo_atividade"]["example"] == "natacao-001"
+    assert properties["nome_atividade"]["example"] == "Natação"

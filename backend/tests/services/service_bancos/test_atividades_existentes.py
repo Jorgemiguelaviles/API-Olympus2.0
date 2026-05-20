@@ -1,108 +1,119 @@
+# tests/services/test_service_atividades.py
+
 from unittest.mock import MagicMock
+
+import pytest
+from fastapi import HTTPException
 
 from src.services.service_bancos.atividades_existentes import (
     service_atividades
 )
 
-from src.models.model_atividades import (
-    model_atividades
-)
+
+# ==========================================
+# FIXTURES
+# ==========================================
+@pytest.fixture
+def fake_db():
+    return MagicMock()
+
+
+@pytest.fixture
+def service(fake_db):
+    return service_atividades(fake_db)
 
 
 # ==========================================
-# Deve buscar atividades com sucesso
+# CADASTRAR ATIVIDADE - SUCESSO
 # ==========================================
-def test_buscar_todas_atividades_com_sucesso():
+def test_cadastrar_atividade_sucesso(
+    service,
+    fake_db
+):
 
-    # Arrange
-    mock_db = MagicMock()
+    payload = {
+        "descricao": "Musculação"
+    }
 
-    retorno_mockado = [
-        MagicMock(
-            codigo_atividade=1,
-            nome_atividade="Corrida"
-        ),
-        MagicMock(
-            codigo_atividade=2,
-            nome_atividade="Musculação"
+    resultado = service.cadastrar_atividade(
+        payload
+    )
+
+    assert resultado is not None
+
+    fake_db.add.assert_called_once()
+    fake_db.commit.assert_called_once()
+    fake_db.refresh.assert_called_once()
+
+
+# ==========================================
+# CADASTRAR ATIVIDADE - ERRO
+# ==========================================
+def test_cadastrar_atividade_erro(
+    service,
+    fake_db
+):
+
+    fake_db.commit.side_effect = Exception(
+        "Erro banco"
+    )
+
+    payload = {
+        "descricao": "Natação"
+    }
+
+    with pytest.raises(HTTPException) as erro:
+
+        service.cadastrar_atividade(
+            payload
         )
+
+    assert erro.value.status_code == 500
+
+    assert (
+        "Erro ao cadastrar atividade"
+        in erro.value.detail
+    )
+
+    fake_db.rollback.assert_called_once()
+
+
+# ==========================================
+# BUSCAR TODAS ATIVIDADES
+# ==========================================
+def test_buscar_todas_atividades(
+    service,
+    fake_db
+):
+
+    atividade1 = MagicMock()
+    atividade2 = MagicMock()
+
+    fake_db.query.return_value.all.return_value = [
+        atividade1,
+        atividade2
     ]
 
-    mock_db.query.return_value.all.return_value = (
-        retorno_mockado
-    )
+    resultado = service.buscar_todas_atividades()
 
-    service = service_atividades(
-        mock_db
-    )
+    assert resultado == [
+        atividade1,
+        atividade2
+    ]
 
-    # Act
-    resultado = (
-        service.buscar_todas_atividades()
-    )
-
-    # Assert
-    mock_db.query.assert_called_once_with(
-        model_atividades
-    )
-
-    mock_db.query.return_value.all.assert_called_once()
-
-    assert resultado == retorno_mockado
+    fake_db.query.assert_called_once()
 
 
 # ==========================================
-# Deve retornar lista vazia
+# BUSCAR TODAS - LISTA VAZIA
 # ==========================================
-def test_buscar_todas_atividades_lista_vazia():
+def test_buscar_todas_atividades_vazio(
+    service,
+    fake_db
+):
 
-    # Arrange
-    mock_db = MagicMock()
+    fake_db.query.return_value.all.return_value = []
 
-    mock_db.query.return_value.all.return_value = []
+    resultado = service.buscar_todas_atividades()
 
-    service = service_atividades(
-        mock_db
-    )
-
-    # Act
-    resultado = (
-        service.buscar_todas_atividades()
-    )
-
-    # Assert
     assert resultado == []
-
-    mock_db.query.assert_called_once_with(
-        model_atividades
-    )
-
-
-# ==========================================
-# Deve propagar erro do banco
-# ==========================================
-def test_buscar_todas_atividades_com_erro():
-
-    # Arrange
-    mock_db = MagicMock()
-
-    mock_db.query.side_effect = Exception(
-        "Erro no banco"
-    )
-
-    service = service_atividades(
-        mock_db
-    )
-
-    # Act / Assert
-    try:
-
-        service.buscar_todas_atividades()
-
-        assert False
-
-    except Exception as erro:
-
-        assert str(erro) == (
-            "Erro no banco"
-        )

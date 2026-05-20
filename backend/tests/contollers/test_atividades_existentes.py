@@ -1,5 +1,8 @@
+# tests/controllers/test_controller_atividades.py
+
 from unittest.mock import MagicMock, patch
 
+import pytest
 from fastapi import HTTPException
 
 from src.contollers.controller_atividades import (
@@ -8,138 +11,265 @@ from src.contollers.controller_atividades import (
 
 
 # ==========================================
-# Fluxo de sucesso
+# FIXTURE
 # ==========================================
-def test_gerencia_atividades_sucesso():
+@pytest.fixture
+def db_mock():
+    return MagicMock()
 
-    fake_db = MagicMock()
 
-    fake_response = [
+# ==========================================
+# INIT
+# ==========================================
+def test_init_controller(db_mock):
+
+    controller = controller_atividade_existente(db_mock)
+
+    assert controller.db == db_mock
+    assert controller.service_banco is not None
+    assert controller.service_validacao is not None
+
+
+# ==========================================
+# BUSCAR ATIVIDADES - SUCESSO
+# ==========================================
+@patch(
+    "src.contollers.controller_atividades.service_atividades"
+)
+@patch(
+    "src.contollers.controller_atividades.service_validacao_atividade"
+)
+def test_busca_atividades_sucesso(
+    mock_validacao,
+    mock_service,
+    db_mock
+):
+
+    atividades_mock = [
         {
-            "codigo_atividade": 1,
-            "nome_atividade": "Corrida"
-        },
-        {
-            "codigo_atividade": 2,
-            "nome_atividade": "Musculação"
+            "codigo_atividade": "abc123",
+            "nome_atividade": "NATAÇÃO"
         }
     ]
 
-    with patch(
-        "src.contollers.atividades_existentes.service_atividades"
-    ) as mock_service:
+    service_instance = MagicMock()
 
-        service_instance = mock_service.return_value
+    service_instance.buscar_todas_atividades.return_value = (
+        atividades_mock
+    )
 
-        service_instance.buscar_todas_atividades.return_value = (
-            fake_response
-        )
+    mock_service.return_value = service_instance
 
-        controller = controller_atividade_existente(
-            fake_db
-        )
+    controller = controller_atividade_existente(db_mock)
 
-        result = controller.busca_atividades()
+    resultado = controller.busca_atividades()
 
-        assert result == fake_response
+    assert resultado == atividades_mock
+
+    service_instance.buscar_todas_atividades.assert_called_once()
 
 
 # ==========================================
-# Lista vazia → 404
+# BUSCAR ATIVIDADES - 404
 # ==========================================
-def test_gerencia_atividades_sem_resultados():
+@patch(
+    "src.contollers.controller_atividades.service_atividades"
+)
+def test_busca_atividades_not_found(
+    mock_service,
+    db_mock
+):
 
-    fake_db = MagicMock()
+    service_instance = MagicMock()
 
-    with patch(
-        "src.contollers.atividades_existentes.service_atividades"
-    ) as mock_service:
+    service_instance.buscar_todas_atividades.return_value = []
 
-        service_instance = mock_service.return_value
+    mock_service.return_value = service_instance
 
-        service_instance.buscar_todas_atividades.return_value = []
+    controller = controller_atividade_existente(db_mock)
 
-        controller = controller_atividade_existente(
-            fake_db
-        )
+    with pytest.raises(HTTPException) as erro:
 
-        try:
+        controller.busca_atividades()
 
-            controller.busca_atividades()
+    assert erro.value.status_code == 404
 
-        except HTTPException as erro:
-
-            assert erro.status_code == 404
-            assert erro.detail == (
-                "Nenhuma atividade encontrada."
-            )
-
-
-# ==========================================
-# HTTPException deve ser propagada
-# ==========================================
-def test_gerencia_atividades_http_exception():
-
-    fake_db = MagicMock()
-
-    with patch(
-        "src.contollers.atividades_existentes.service_atividades"
-    ) as mock_service:
-
-        service_instance = mock_service.return_value
-
-        service_instance.buscar_todas_atividades.side_effect = (
-            HTTPException(
-                status_code=401,
-                detail="Não autorizado"
-            )
-        )
-
-        controller = controller_atividade_existente(
-            fake_db
-        )
-
-        try:
-
-            controller.busca_atividades()
-
-        except HTTPException as erro:
-
-            assert erro.status_code == 401
-            assert erro.detail == (
-                "Não autorizado"
-            )
+    assert (
+        erro.value.detail
+        == "Nenhuma atividade encontrada."
+    )
 
 
 # ==========================================
-# Exception genérica → 500
+# BUSCAR ATIVIDADES - ERRO INTERNO
 # ==========================================
-def test_gerencia_atividades_erro_interno():
+@patch(
+    "src.contollers.controller_atividades.service_atividades"
+)
+def test_busca_atividades_erro_interno(
+    mock_service,
+    db_mock
+):
 
-    fake_db = MagicMock()
+    service_instance = MagicMock()
 
-    with patch(
-        "src.contollers.atividades_existentes.service_atividades"
-    ) as mock_service:
+    service_instance.buscar_todas_atividades.side_effect = (
+        Exception("Falha banco")
+    )
 
-        service_instance = mock_service.return_value
+    mock_service.return_value = service_instance
 
-        service_instance.buscar_todas_atividades.side_effect = (
-            Exception("Erro banco")
+    controller = controller_atividade_existente(db_mock)
+
+    with pytest.raises(HTTPException) as erro:
+
+        controller.busca_atividades()
+
+    assert erro.value.status_code == 500
+
+    assert (
+        "Erro interno ao consultar atividades"
+        in erro.value.detail
+    )
+
+
+# ==========================================
+# CADASTRAR ATIVIDADE - SUCESSO
+# ==========================================
+@patch(
+    "src.contollers.controller_atividades.service_atividades"
+)
+@patch(
+    "src.contollers.controller_atividades.service_validacao_atividade"
+)
+def test_cadastrar_atividade_sucesso(
+    mock_validacao,
+    mock_service,
+    db_mock
+):
+
+    atividade_mock = {
+        "codigo_atividade": "abc123",
+        "nome_atividade": "NATAÇÃO"
+    }
+
+    service_instance = MagicMock()
+
+    service_instance.cadastrar_atividade.return_value = (
+        atividade_mock
+    )
+
+    mock_service.return_value = service_instance
+
+    validacao_instance = MagicMock()
+
+    mock_validacao.return_value = validacao_instance
+
+    controller = controller_atividade_existente(db_mock)
+
+    payload = {
+        "descricao": " natação "
+    }
+
+    resultado = controller.cadastrar_atividade(
+        payload
+    )
+
+    assert resultado == atividade_mock
+
+    validacao_instance.validar_cadastro.assert_called_once_with(
+        payload,
+        db_mock
+    )
+
+    service_instance.cadastrar_atividade.assert_called_once()
+
+    payload_enviado = (
+        service_instance.cadastrar_atividade.call_args[0][0]
+    )
+
+    assert payload_enviado["descricao"] == "NATAÇÃO"
+
+
+# ==========================================
+# CADASTRAR ATIVIDADE - HTTPException
+# ==========================================
+@patch(
+    "src.contollers.controller_atividades.service_atividades"
+)
+@patch(
+    "src.contollers.controller_atividades.service_validacao_atividade"
+)
+def test_cadastrar_atividade_http_exception(
+    mock_validacao,
+    mock_service,
+    db_mock
+):
+
+    validacao_instance = MagicMock()
+
+    validacao_instance.validar_cadastro.side_effect = (
+        HTTPException(
+            status_code=400,
+            detail="Atividade já existe"
         )
+    )
 
-        controller = controller_atividade_existente(
-            fake_db
-        )
+    mock_validacao.return_value = validacao_instance
 
-        try:
+    mock_service.return_value = MagicMock()
 
-            controller.busca_atividades()
+    controller = controller_atividade_existente(db_mock)
 
-        except HTTPException as erro:
+    with pytest.raises(HTTPException) as erro:
 
-            assert erro.status_code == 500
-            assert (
-                "Erro interno ao consultar atividades"
-                in erro.detail
-            )
+        controller.cadastrar_atividade({
+            "descricao": "corrida"
+        })
+
+    assert erro.value.status_code == 400
+
+    assert erro.value.detail == "Atividade já existe"
+
+
+# ==========================================
+# CADASTRAR ATIVIDADE - ERRO INTERNO
+# ==========================================
+@patch(
+    "src.contollers.controller_atividades.service_atividades"
+)
+@patch(
+    "src.contollers.controller_atividades.service_validacao_atividade"
+)
+def test_cadastrar_atividade_erro_interno(
+    mock_validacao,
+    mock_service,
+    db_mock
+):
+
+    validacao_instance = MagicMock()
+
+    mock_validacao.return_value = validacao_instance
+
+    service_instance = MagicMock()
+
+    service_instance.cadastrar_atividade.side_effect = (
+        Exception("Falha ao salvar")
+    )
+
+    mock_service.return_value = service_instance
+
+    controller = controller_atividade_existente(db_mock)
+
+    with pytest.raises(HTTPException) as erro:
+
+        controller.cadastrar_atividade({
+            "descricao": "corrida"
+        })
+
+    assert erro.value.status_code == 500
+
+    assert (
+        "Erro ao cadastrar atividade"
+        in erro.value.detail
+    )

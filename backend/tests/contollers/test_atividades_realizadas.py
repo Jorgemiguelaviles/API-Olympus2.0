@@ -1,9 +1,6 @@
-# tests/controllers/test_controller_atividades_realizadas.py
+from unittest.mock import MagicMock, patch
 
 import pytest
-
-from unittest.mock import Mock, patch
-
 from fastapi import HTTPException
 
 from src.contollers.controller_atividades_realizadas import (
@@ -12,380 +9,246 @@ from src.contollers.controller_atividades_realizadas import (
 
 
 # ==========================================
-# buscar_todas_atividades
+# FIXTURE
 # ==========================================
+@pytest.fixture
+def fake_db():
+    return MagicMock()
 
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_buscar_todas_atividades_sucesso(
-    mock_service
-):
 
-    db_mock = Mock()
+@pytest.fixture
+def controller(fake_db):
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.load_dotenv"
+    ):
+
+        with patch(
+            "src.contollers.controller_atividades_realizadas.os.getenv",
+            return_value="fake-key"
+        ):
+
+            return controller_atividades_realizadas(fake_db)
+
+
+# ==========================================
+# BUSCAR TODAS - SUCESSO
+# ==========================================
+def test_buscar_todas_atividades_sucesso(controller):
+
+    atividade_mock = MagicMock()
+
+    atividade_mock.funcional = 1
+    atividade_mock.codigo_atividade = "abc"
+    atividade_mock.descricao = "Natação"
+    atividade_mock.data_hora = "2025-01-01"
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+    ) as mock_service:
+
+        mock_service.return_value.get_recupera_todas_atividades.return_value = [
+            atividade_mock
+        ]
+
+        resultado = controller.buscar_todas_atividades()
+
+        assert resultado[0]["funcional"] == 1
+        assert resultado[0]["nome_atividade"] == "Natação"
+
+
+# ==========================================
+# BUSCAR TODAS - 404
+# ==========================================
+def test_buscar_todas_atividades_sem_resultado(controller):
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+    ) as mock_service:
+
+        mock_service.return_value.get_recupera_todas_atividades.return_value = []
+
+        with pytest.raises(HTTPException) as erro:
+
+            controller.buscar_todas_atividades()
+
+        assert erro.value.status_code == 404
+
+
+# ==========================================
+# BUSCAR TODAS - EXCEPTION
+# ==========================================
+def test_buscar_todas_atividades_exception(controller):
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+    ) as mock_service:
+
+        mock_service.side_effect = Exception("erro fake")
+
+        with pytest.raises(HTTPException) as erro:
+
+            controller.buscar_todas_atividades()
+
+        assert erro.value.status_code == 500
+
+
+# ==========================================
+# BUSCAR POR FUNCIONAL - SUCESSO
+# ==========================================
+def test_buscar_por_funcional_sucesso(controller):
 
     atividades_mock = [
         {
-            "funcional": 1001,
-            "descricao": "Corrida"
+            "funcional": 1,
+            "codigo_atividade": "abc",
+            "descricao": "Musculação",
+            "data_hora": "2025"
         }
     ]
 
-    instancia_service = mock_service.return_value
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+    ) as mock_service:
 
-    instancia_service.get_recupera_todas_atividades.return_value = (
-        atividades_mock
-    )
+        mock_service.return_value.get_recupera_atividades_por_funcional.return_value = atividades_mock
 
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
+        with patch.object(
+            controller,
+            "_gerar_analise_ia",
+            return_value={"status": "ok"}
+        ):
 
-    response = controller.buscar_todas_atividades()
+            resultado = controller.buscar_por_funcional(1)
 
-    assert response == atividades_mock
-
-
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_buscar_todas_atividades_vazio(
-    mock_service
-):
-
-    db_mock = Mock()
-
-    instancia_service = mock_service.return_value
-
-    instancia_service.get_recupera_todas_atividades.return_value = []
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    with pytest.raises(HTTPException) as erro:
-
-        controller.buscar_todas_atividades()
-
-    assert erro.value.status_code == 404
-
-    assert (
-        erro.value.detail
-        == "Nenhuma atividade encontrada."
-    )
-
-
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_buscar_todas_atividades_erro_interno(
-    mock_service
-):
-
-    db_mock = Mock()
-
-    instancia_service = mock_service.return_value
-
-    instancia_service.get_recupera_todas_atividades.side_effect = (
-        Exception("Erro banco")
-    )
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    with pytest.raises(HTTPException) as erro:
-
-        controller.buscar_todas_atividades()
-
-    assert erro.value.status_code == 500
-
-    assert (
-        "Erro interno ao consultar atividades"
-        in erro.value.detail
-    )
+            assert "atividades" in resultado
+            assert "analise_ia" in resultado
 
 
 # ==========================================
-# buscar_por_funcional
+# BUSCAR POR FUNCIONAL - 404
 # ==========================================
+def test_buscar_por_funcional_404(controller):
 
-@patch(
-    "src.contollers.atividades_realizadas.os.getenv"
-)
-@patch(
-    "src.contollers.atividades_realizadas.service_gemini"
-)
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_buscar_por_funcional_sucesso(
-    mock_service,
-    mock_gemini,
-    mock_getenv
-):
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+    ) as mock_service:
 
-    db_mock = Mock()
+        mock_service.return_value.get_recupera_atividades_por_funcional.return_value = []
 
-    mock_getenv.return_value = "fake_key"
+        with pytest.raises(HTTPException) as erro:
 
-    atividades_mock = [
-        {
-            "funcional": 1001,
-            "descricao": "Corrida 5km"
+            controller.buscar_por_funcional(1)
+
+        assert erro.value.status_code == 404
+
+
+# ==========================================
+# GERAR ANALISE - SEM API KEY
+# ==========================================
+def test_gerar_analise_sem_api_key(fake_db):
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.os.getenv",
+        return_value=None
+    ):
+
+        controller = controller_atividades_realizadas(fake_db)
+
+        resultado = controller._gerar_analise_ia(
+            ["Natação"],
+            [{"nome_atividade": "Natação"}]
+        )
+
+        assert resultado["status"] == "no-api-key"
+
+
+# ==========================================
+# GERAR ANALISE - SUCESSO
+# ==========================================
+def test_gerar_analise_sucesso(controller):
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_gemini"
+    ) as mock_gemini:
+
+        mock_gemini.return_value.analisa_dados.return_value = {
+            "analise": "Boa evolução"
         }
-    ]
 
-    instancia_service = mock_service.return_value
-
-    instancia_service.get_recupera_atividades_por_funcional.return_value = (
-        atividades_mock
-    )
-
-    instancia_gemini = mock_gemini.return_value
-
-    instancia_gemini.analisa_dados.return_value = (
-        "Usuário evoluindo."
-    )
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    response = controller.buscar_por_funcional(
-        1001
-    )
-
-    assert (
-        response["atividades"]
-        == atividades_mock
-    )
-
-    assert (
-        response["analise_ia"]
-        == "Usuário evoluindo."
-    )
-
-
-@patch(
-    "src.contollers.atividades_realizadas.os.getenv"
-)
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_buscar_por_funcional_sem_api_key(
-    mock_service,
-    mock_getenv
-):
-
-    db_mock = Mock()
-
-    mock_getenv.return_value = None
-
-    atividades_mock = [
-        {
-            "funcional": 1001,
-            "descricao": "Corrida 5km"
-        }
-    ]
-
-    instancia_service = mock_service.return_value
-
-    instancia_service.get_recupera_atividades_por_funcional.return_value = (
-        atividades_mock
-    )
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    response = controller.buscar_por_funcional(
-        1001
-    )
-
-    assert (
-        response["analise_ia"]
-        == "API_KEY_GEMINI não configurada. Análise de IA não realizada."
-    )
-
-
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_buscar_por_funcional_sem_atividades(
-    mock_service
-):
-
-    db_mock = Mock()
-
-    instancia_service = mock_service.return_value
-
-    instancia_service.get_recupera_atividades_por_funcional.return_value = []
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    with pytest.raises(HTTPException) as erro:
-
-        controller.buscar_por_funcional(
-            1001
+        resultado = controller._gerar_analise_ia(
+            ["Natação"],
+            [{"nome_atividade": "Natação"}]
         )
 
-    assert erro.value.status_code == 404
-
-    assert (
-        erro.value.detail
-        == "Nenhuma atividade encontrada para este funcional."
-    )
-
-
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_buscar_por_funcional_erro_interno(
-    mock_service
-):
-
-    db_mock = Mock()
-
-    instancia_service = mock_service.return_value
-
-    instancia_service.get_recupera_atividades_por_funcional.side_effect = (
-        Exception("Erro banco")
-    )
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    with pytest.raises(HTTPException) as erro:
-
-        controller.buscar_por_funcional(
-            1001
-        )
-
-    assert erro.value.status_code == 500
-
-    assert (
-        "Erro interno ao consultar funcional"
-        in erro.value.detail
-    )
+        assert resultado["status"] == "ok"
+        assert resultado["analise"] == "Boa evolução"
 
 
 # ==========================================
-# cadastrar_atividade
+# GERAR ANALISE - FALLBACK
 # ==========================================
+def test_gerar_analise_fallback(controller):
 
-@patch(
-    "src.contollers.atividades_realizadas.service_validacao_atividade"
-)
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_cadastrar_atividade_sucesso(
-    mock_service,
-    mock_validacao
-):
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_gemini"
+    ) as mock_gemini:
 
-    db_mock = Mock()
-
-    payload_mock = {
-        "funcional": 1001,
-        "descricao": "Corrida"
-    }
-
-    atividade_mock = {
-        "id": 1,
-        "descricao": "Corrida"
-    }
-
-    instancia_service = mock_service.return_value
-
-    instancia_service.salvar.return_value = (
-        atividade_mock
-    )
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    response = controller.cadastrar_atividade(
-        payload_mock
-    )
-
-    assert response == atividade_mock
-
-
-@patch(
-    "src.contollers.atividades_realizadas.service_validacao_atividade"
-)
-def test_cadastrar_atividade_erro_validacao(
-    mock_validacao
-):
-
-    db_mock = Mock()
-
-    payload_mock = {}
-
-    instancia_validacao = mock_validacao.return_value
-
-    instancia_validacao.validar.side_effect = (
-        HTTPException(
-            status_code=400,
-            detail="Payload inválido"
-        )
-    )
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    with pytest.raises(HTTPException) as erro:
-
-        controller.cadastrar_atividade(
-            payload_mock
+        mock_gemini.return_value.analisa_dados.side_effect = Exception(
+            "gemini off"
         )
 
-    assert erro.value.status_code == 400
-
-
-@patch(
-    "src.contollers.atividades_realizadas.service_validacao_atividade"
-)
-@patch(
-    "src.contollers.atividades_realizadas.service_atividades_realizadas"
-)
-def test_cadastrar_atividade_erro_interno(
-    mock_service,
-    mock_validacao
-):
-
-    db_mock = Mock()
-
-    payload_mock = {
-        "funcional": 1001
-    }
-
-    instancia_service = mock_service.return_value
-
-    instancia_service.salvar.side_effect = (
-        Exception("Erro banco")
-    )
-
-    controller = controller_atividades_realizadas(
-        db_mock
-    )
-
-    with pytest.raises(HTTPException) as erro:
-
-        controller.cadastrar_atividade(
-            payload_mock
+        resultado = controller._gerar_analise_ia(
+            ["Natação"],
+            [{"nome_atividade": "Natação"}]
         )
 
-    assert erro.value.status_code == 500
+        assert resultado["status"] == "fallback"
 
-    assert (
-        "Erro interno ao cadastrar atividade"
-        in erro.value.detail
-    )
+
+# ==========================================
+# CADASTRAR ATIVIDADE - SUCESSO
+# ==========================================
+def test_cadastrar_atividade_sucesso(controller):
+
+    atividade_mock = MagicMock()
+
+    atividade_mock.funcional = 1
+    atividade_mock.codigo_atividade = "abc"
+    atividade_mock.descricao = "Natação"
+    atividade_mock.data_hora = "2025"
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_validacao_atividade"
+    ):
+
+        with patch(
+            "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+        ) as mock_service:
+
+            mock_service.return_value.salvar.return_value = atividade_mock
+
+            resultado = controller.cadastrar_atividade({})
+
+            assert resultado["status"] == "ok"
+            assert resultado["atividade"]["nome_atividade"] == "Natação"
+
+
+# ==========================================
+# CADASTRAR ATIVIDADE - EXCEPTION
+# ==========================================
+def test_cadastrar_atividade_exception(controller):
+
+    with patch(
+        "src.contollers.controller_atividades_realizadas.service_validacao_atividade"
+    ) as mock_validacao:
+
+        mock_validacao.return_value.validar.side_effect = Exception(
+            "erro fake"
+        )
+
+        with pytest.raises(HTTPException) as erro:
+
+            controller.cadastrar_atividade({})
+
+        assert erro.value.status_code == 500

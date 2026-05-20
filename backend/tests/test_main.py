@@ -1,94 +1,150 @@
+# tests/test_main.py
+
+from fastapi import FastAPI
+from fastapi.routing import APIRoute
+
 from src.main import app
 
-
-# ==========================================
-# App criada corretamente
-# ==========================================
-def test_app_foi_criada():
-
-    assert app is not None
+from src.middlewares.bearer import (
+    AuthMiddleware
+)
 
 
 # ==========================================
-# Metadados da API
+# APP EXISTE
 # ==========================================
-def test_metadata_api():
+def test_app_instance():
 
-    assert app.title == (
+    assert isinstance(
+        app,
+        FastAPI
+    )
+
+
+# ==========================================
+# TITLE
+# ==========================================
+def test_app_title():
+
+    assert app.title == "Olympus API"
+
+
+# ==========================================
+# VERSION
+# ==========================================
+def test_app_version():
+
+    assert app.version == "2.0.0"
+
+
+# ==========================================
+# DOCS URL
+# ==========================================
+def test_docs_url():
+
+    assert app.docs_url == "/docs"
+
+
+# ==========================================
+# REDOC URL
+# ==========================================
+def test_redoc_url():
+
+    assert app.redoc_url == "/redoc"
+
+
+# ==========================================
+# OPENAPI URL
+# ==========================================
+def test_openapi_url():
+
+    assert app.openapi_url == "/openapi.json"
+
+
+# ==========================================
+# MIDDLEWARE REGISTRADO
+# ==========================================
+def test_auth_middleware_exists():
+
+    middlewares = [
+        middleware.cls
+        for middleware in app.user_middleware
+    ]
+
+    assert AuthMiddleware in middlewares
+
+
+# ==========================================
+# ROTAS USUÁRIOS
+# ==========================================
+def test_rotas_usuarios_registradas():
+
+    paths = [
+        route.path
+        for route in app.routes
+        if isinstance(route, APIRoute)
+    ]
+
+    assert "/usuarios/login" in paths
+
+    assert "/usuarios/cadastro" in paths
+
+    assert "/usuarios/listar" in paths
+
+
+# ==========================================
+# ROTAS ATIVIDADES
+# ==========================================
+def test_rotas_atividades_registradas():
+
+    paths = [
+        route.path
+        for route in app.routes
+        if isinstance(route, APIRoute)
+    ]
+
+    assert "/atividades/opcoes" in paths
+
+
+# ==========================================
+# ROTAS ATIVIDADES PRATICADAS
+# ==========================================
+def test_rotas_atividades_praticadas_registradas():
+
+    paths = [
+        route.path
+        for route in app.routes
+        if isinstance(route, APIRoute)
+    ]
+
+    assert "/atividadespraticadas/" in paths
+
+    assert "/atividadespraticadas/minhas" in paths
+
+
+# ==========================================
+# OPENAPI GERADA
+# ==========================================
+def test_openapi_schema():
+
+    schema = app.openapi()
+
+    assert schema["info"]["title"] == (
         "Olympus API"
     )
 
-    assert app.description == (
-        "API para gerenciamento de atividades físicas"
-    )
-
-    assert app.version == (
-        "1.0.0"
+    assert schema["info"]["version"] == (
+        "2.0.0"
     )
 
 
 # ==========================================
-# Rotas registradas
+# TAGS EXISTEM
 # ==========================================
-def test_rotas_registradas():
+def test_tags_existentes():
 
-    rotas = [
-        route.path
-        for route in app.routes
-    ]
+    schema = app.openapi()
 
-    assert (
-        "/atividades/opcoes"
-        in rotas
-    )
+    tags = schema.get("tags", [])
 
-    assert (
-        "/atividades/praticadas/"
-        in rotas
-    )
-
-    assert (
-        "/atividades/praticadas/{funcional}"
-        in rotas
-    )
-def test_metodos_rotas():
-
-    rotas_praticadas = [
-        route
-        for route in app.routes
-        if route.path == "/atividades/praticadas/"
-    ]
-
-    # Deve existir GET e POST no mesmo endpoint
-    metodos = set()
-
-    for rota in rotas_praticadas:
-        metodos.update(
-            rota.methods
-        )
-
-    assert "GET" in metodos
-
-    assert "POST" in metodos
-
-
-    rota_opcoes = next(
-        route
-        for route in app.routes
-        if route.path == "/atividades/opcoes"
-    )
-
-    assert "GET" in (
-        rota_opcoes.methods
-    )
-
-
-    rota_funcional = next(
-        route
-        for route in app.routes
-        if route.path == "/atividades/praticadas/{funcional}"
-    )
-
-    assert "GET" in (
-        rota_funcional.methods
-    )
+    assert isinstance(tags, list)

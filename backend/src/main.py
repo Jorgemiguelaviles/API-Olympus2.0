@@ -15,7 +15,7 @@ from src.routes.routes_acessos import (
     roteador_usuarios as rotas_de_usuarios
 )
 
-from src.interfaces.docs.main import (
+from src.interfaces.docs.docs_main import (
     SWAGGER_CONFIG
 )
 

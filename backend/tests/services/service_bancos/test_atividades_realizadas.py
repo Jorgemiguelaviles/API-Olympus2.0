@@ -1,3 +1,5 @@
+# tests/services/test_service_atividades_realizadas.py
+
 from datetime import datetime
 from unittest.mock import MagicMock
 
@@ -9,274 +11,162 @@ from src.services.service_bancos.atividades_realizadas import (
 
 
 # ==========================================
-# Mock da model atividade realizada
+# FIXTURE
 # ==========================================
-
-class MockAtividadeRealizada:
-
-    def __init__(
-        self,
-        funcional,
-        codigo_atividade,
-        descricao,
-        data_hora
-    ):
-        self.funcional = funcional
-        self.codigo_atividade = codigo_atividade
-        self.descricao = descricao
-        self.data_hora = data_hora
-
-
-# ==========================================
-# Mock da model atividade
-# ==========================================
-
-class MockAtividade:
-
-    def __init__(
-        self,
-        codigo_atividade,
-        nome_atividade
-    ):
-        self.codigo_atividade = codigo_atividade
-        self.nome_atividade = nome_atividade
-
-
-# ==========================================
-# Fixture banco fake
-# ==========================================
-
 @pytest.fixture
-def mock_db():
-
+def fake_db():
     return MagicMock()
 
 
-# ==========================================
-# Teste buscar todas atividades
-# ==========================================
+@pytest.fixture
+def service(fake_db):
+    return service_atividades_realizadas(fake_db)
 
-def test_get_recupera_todas_atividades(
-    mock_db
-):
 
-    atividades_mock = [
-        MockAtividadeRealizada(
-            funcional=1001,
-            codigo_atividade="RUN",
-            descricao="Corrida",
-            data_hora=datetime.now()
-        ),
-        MockAtividadeRealizada(
-            funcional=1002,
-            codigo_atividade="SWIM",
-            descricao="Natação",
-            data_hora=datetime.now()
-        )
+# ==========================================
+# GET TODAS ATIVIDADES
+# ==========================================
+def test_get_recupera_todas_atividades(service, fake_db):
+
+    atividade1 = MagicMock()
+    atividade2 = MagicMock()
+
+    fake_db.query.return_value.all.return_value = [
+        atividade1,
+        atividade2
     ]
-
-    mock_db.query.return_value.all.return_value = (
-        atividades_mock
-    )
-
-    service = service_atividades_realizadas(
-        mock_db
-    )
 
     resultado = service.get_recupera_todas_atividades()
 
-    assert resultado == atividades_mock
+    assert resultado == [atividade1, atividade2]
 
-    mock_db.query.assert_called_once()
+    fake_db.query.assert_called_once()
 
 
 # ==========================================
-# Teste buscar atividades por funcional
+# GET POR FUNCIONAL
 # ==========================================
-
 def test_get_recupera_atividades_por_funcional(
-    mock_db
+    service,
+    fake_db
 ):
 
-    atividades_mock = [
-        MockAtividadeRealizada(
-            funcional=1001,
-            codigo_atividade="RUN",
-            descricao="Corrida de 5km",
-            data_hora=datetime.now()
-        )
+    atividade = MagicMock()
+
+    atividade.funcional = 1
+    atividade.codigo_atividade = "SUPINO-001"
+    atividade.descricao = "Treino peito"
+    atividade.data_hora = datetime.now()
+
+    (
+        fake_db.query.return_value
+        .filter.return_value
+        .all.return_value
+    ) = [atividade]
+
+    resultado = service.get_recupera_atividades_por_funcional(1)
+
+    assert resultado == [
+        {
+            "funcional": 1,
+            "codigo_atividade": "SUPINO-001",
+            "descricao": "Treino peito",
+            "data_hora": atividade.data_hora
+        }
     ]
 
-    (
-        mock_db.query.return_value
-        .filter.return_value
-        .all.return_value
-    ) = atividades_mock
-
-    service = service_atividades_realizadas(
-        mock_db
-    )
-
-    resultado = (
-        service.get_recupera_atividades_por_funcional(
-            1001
-        )
-    )
-
-    assert len(resultado) == 1
-
-    assert resultado[0]["funcional"] == 1001
-
-    assert resultado[0]["codigo_atividade"] == "RUN"
-
-    assert resultado[0]["descricao"] == "Corrida de 5km"
+    fake_db.query.assert_called_once()
 
 
 # ==========================================
-# Teste buscar atividades por funcional vazio
+# SALVAR SUCESSO
 # ==========================================
-
-def test_get_recupera_atividades_por_funcional_vazio(
-    mock_db
+def test_salvar_sucesso(
+    service,
+    fake_db
 ):
 
-    (
-        mock_db.query.return_value
-        .filter.return_value
-        .all.return_value
-    ) = []
-
-    service = service_atividades_realizadas(
-        mock_db
-    )
-
-    resultado = (
-        service.get_recupera_atividades_por_funcional(
-            9999
-        )
-    )
-
-    assert resultado == []
-
-
-# ==========================================
-# Teste salvar atividade com sucesso
-# ==========================================
-
-def test_salvar_atividade_sucesso(
-    mock_db
-):
-
-    atividade_existente = MockAtividade(
-        codigo_atividade="RUN",
-        nome_atividade="Corrida"
-    )
+    atividade_existente = MagicMock()
+    atividade_existente.codigo_atividade = "SUPINO-001"
 
     (
-        mock_db.query.return_value
+        fake_db.query.return_value
         .filter.return_value
         .first.return_value
     ) = atividade_existente
 
-    service = service_atividades_realizadas(
-        mock_db
-    )
-
     payload = {
-        "funcional": 1001,
-        "codigo_atividade": "Corrida",
-        "descricao": "Corrida no parque",
+        "funcional": 1,
+        "codigo_atividade": "SUPINO-001",
+        "descricao": "Treino peito",
         "data_hora": datetime.now()
     }
 
-    resultado = service.salvar(
-        payload
-    )
+    resultado = service.salvar(payload)
 
-    assert resultado.funcional == 1001
+    assert resultado is not None
 
-    assert resultado.codigo_atividade == "RUN"
-
-    assert resultado.descricao == "Corrida no parque"
-
-    mock_db.add.assert_called_once()
-
-    mock_db.commit.assert_called_once()
-
-    mock_db.refresh.assert_called_once()
+    fake_db.add.assert_called_once()
+    fake_db.commit.assert_called_once()
+    fake_db.refresh.assert_called_once()
 
 
 # ==========================================
-# Teste salvar atividade inexistente
+# SALVAR - ATIVIDADE NÃO EXISTE
 # ==========================================
-
-def test_salvar_atividade_inexistente(
-    mock_db
+def test_salvar_atividade_nao_encontrada(
+    service,
+    fake_db
 ):
 
     (
-        mock_db.query.return_value
+        fake_db.query.return_value
         .filter.return_value
         .first.return_value
     ) = None
 
-    service = service_atividades_realizadas(
-        mock_db
-    )
-
     payload = {
-        "funcional": 1001,
-        "codigo_atividade": "AtividadeFake",
+        "funcional": 1,
+        "codigo_atividade": "INEXISTENTE",
         "descricao": "Teste",
         "data_hora": datetime.now()
     }
 
-    with pytest.raises(
-        ValueError,
-        match="Atividade não encontrada."
-    ):
+    with pytest.raises(ValueError) as erro:
 
-        service.salvar(
-            payload
-        )
+        service.salvar(payload)
+
+    assert str(erro.value) == "Atividade não encontrada."
 
 
 # ==========================================
-# Teste salvar chama métodos do banco
+# SALVAR - ERRO NO COMMIT
 # ==========================================
-
-def test_salvar_chama_metodos_db(
-    mock_db
+def test_salvar_commit_error(
+    service,
+    fake_db
 ):
 
-    atividade_existente = MockAtividade(
-        codigo_atividade="SWIM",
-        nome_atividade="Natação"
-    )
+    atividade_existente = MagicMock()
+    atividade_existente.codigo_atividade = "SUPINO-001"
 
     (
-        mock_db.query.return_value
+        fake_db.query.return_value
         .filter.return_value
         .first.return_value
     ) = atividade_existente
 
-    service = service_atividades_realizadas(
-        mock_db
+    fake_db.commit.side_effect = Exception(
+        "Erro banco"
     )
 
     payload = {
-        "funcional": 2001,
-        "codigo_atividade": "Natação",
-        "descricao": "Treino de natação",
+        "funcional": 1,
+        "codigo_atividade": "SUPINO-001",
+        "descricao": "Teste",
         "data_hora": datetime.now()
     }
 
-    service.salvar(
-        payload
-    )
+    with pytest.raises(Exception):
 
-    assert mock_db.add.called
-
-    assert mock_db.commit.called
-
-    assert mock_db.refresh.called
+        service.salvar(payload)

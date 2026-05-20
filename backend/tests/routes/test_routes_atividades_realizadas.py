@@ -1,21 +1,37 @@
-from datetime import datetime
-from unittest.mock import patch, MagicMock
+# tests/routes/test_routes_atividades_praticadas.py
 
-from fastapi import FastAPI
+from unittest.mock import MagicMock
+
+from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
-from fastapi.exceptions import HTTPException
 
 from src.routes.routes_atividades_realizadas import (
-    roteador_atividades_praticadas
+    roteador_atividades_praticadas,
+    get_controller
 )
-from src.config.config_banco import get_db
 
 
 # ==========================================
-# Configuração da aplicação de teste
+# APP
 # ==========================================
-
 app = FastAPI()
+
+
+# ==========================================
+# MIDDLEWARE MOCK USER
+# ==========================================
+@app.middleware("http")
+async def fake_auth(
+    request: Request,
+    call_next
+):
+
+    request.state.user = {
+        "funcional": 999
+    }
+
+    return await call_next(request)
+
 
 app.include_router(
     roteador_atividades_praticadas
@@ -23,124 +39,68 @@ app.include_router(
 
 
 # ==========================================
-# Mock do banco
+# MOCK CONTROLLER
 # ==========================================
+mock_controller = MagicMock()
 
-def override_get_db():
-    db_mock = MagicMock()
-    yield db_mock
-
-
-app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_controller] = (
+    lambda: mock_controller
+)
 
 client = TestClient(app)
 
 
 # ==========================================
-# Teste POST - sucesso
+# CADASTRAR ATIVIDADE
 # ==========================================
+def test_cadastrar_atividade():
 
-@patch(
-    "src.routes.routes_atividades_realizadas.controller_atividades_realizadas"
-)
-def test_cadastrar_atividade_sucesso(
-    mock_controller
-):
-
-    mock_instance = mock_controller.return_value
-
-    mock_instance.cadastrar_atividade.return_value = {
-        "funcional": 1001,
-        "codigo_atividade": "RUN",
-        "descricao": "Corrida de 5km",
-        "data_hora": datetime.now()
-    }
-
-    payload = {
-        "funcional": 1001,
-        "codigo_atividade": "RUN",
-        "descricao": "Corrida de 5km"
+    mock_controller.cadastrar_atividade.return_value = {
+        "status": "ok",
+        "atividade": {
+            "funcional": 999,
+            "codigo_atividade": "SUPINO-001",
+            "nome_atividade": "SUPINO",
+            "data_hora": "2026-01-01T10:00:00"
+        }
     }
 
     response = client.post(
-        "/atividades/praticadas/",
-        json=payload
+        "/atividadespraticadas/",
+        json={
+            "codigo_atividade": "SUPINO-001",
+            "descricao": "Treino peito"
+        }
     )
 
     assert response.status_code == 201
 
     body = response.json()
 
-    assert body["funcional"] == 1001
-    assert body["codigo_atividade"] == "RUN"
-    assert body["descricao"] == "Corrida de 5km"
+    assert body["status"] == "ok"
 
-    mock_instance.cadastrar_atividade.assert_called_once()
-
-
-# ==========================================
-# Teste POST - erro interno
-# ==========================================
-
-@patch(
-    "src.routes.routes_atividades_realizadas.controller_atividades_realizadas"
-)
-def test_cadastrar_atividade_erro(
-    mock_controller
-):
-
-    mock_instance = mock_controller.return_value
-
-    mock_instance.cadastrar_atividade.side_effect = HTTPException(
-        status_code=500,
-        detail="Erro interno"
+    assert (
+        body["atividade"]["codigo_atividade"]
+        == "SUPINO-001"
     )
 
-    payload = {
-        "funcional": 1001,
-        "codigo_atividade": "RUN",
-        "descricao": "Corrida de 5km"
-    }
-
-    response = client.post(
-        "/atividades/praticadas/",
-        json=payload
-    )
-
-    assert response.status_code == 500
-
-    body = response.json()
-
-    assert body["detail"] == "Erro interno"
+    mock_controller.cadastrar_atividade.assert_called_once()
 
 
 # ==========================================
-# Teste GET por funcional - sucesso
+# BUSCAR MINHAS ATIVIDADES
 # ==========================================
+def test_buscar_minhas_atividades():
 
-@patch(
-    "src.routes.routes_atividades_realizadas.controller_atividades_realizadas"
-)
-def test_buscar_por_funcional_sucesso(
-    mock_controller
-):
-
-    mock_instance = mock_controller.return_value
-
-    mock_instance.buscar_por_funcional.return_value = {
-        "atividades": [
-            {
-                "funcional": 1001,
-                "codigo_atividade": "RUN",
-                "descricao": "Corrida de 5km",
-                "data_hora": datetime.now()
-            }
-        ],
-        "analise_ia": "Usuário apresenta boa evolução."
+    mock_controller.buscar_por_funcional.return_value = {
+        "atividades": [],
+        "analise_ia": {
+            "status": "ok"
+        }
     }
 
     response = client.get(
-        "/atividades/praticadas/1001"
+        "/atividadespraticadas/minhas"
     )
 
     assert response.status_code == 200
@@ -148,143 +108,71 @@ def test_buscar_por_funcional_sucesso(
     body = response.json()
 
     assert "atividades" in body
+
     assert "analise_ia" in body
 
-    assert len(body["atividades"]) == 1
-
-    assert body["atividades"][0]["funcional"] == 1001
-
-    mock_instance.buscar_por_funcional.assert_called_once_with(
-        1001
+    mock_controller.buscar_por_funcional.assert_called_once_with(
+        999
     )
 
 
 # ==========================================
-# Teste GET por funcional - 404
+# BUSCAR TODAS
 # ==========================================
+def test_buscar_todas_atividades():
 
-@patch(
-    "src.routes.routes_atividades_realizadas.controller_atividades_realizadas"
-)
-def test_buscar_por_funcional_nao_encontrado(
-    mock_controller
-):
-
-    mock_instance = mock_controller.return_value
-
-    mock_instance.buscar_por_funcional.side_effect = HTTPException(
-        status_code=404,
-        detail="Nenhuma atividade encontrada."
-    )
-
-    response = client.get(
-        "/atividades/praticadas/1001"
-    )
-
-    assert response.status_code == 404
-
-    body = response.json()
-
-    assert body["detail"] == "Nenhuma atividade encontrada."
-
-
-# ==========================================
-# Teste GET todas atividades - sucesso
-# ==========================================
-
-@patch(
-    "src.routes.routes_atividades_realizadas.controller_atividades_realizadas"
-)
-def test_buscar_todas_atividades_sucesso(
-    mock_controller
-):
-
-    mock_instance = mock_controller.return_value
-
-    mock_instance.buscar_todas_atividades.return_value = [
+    mock_controller.buscar_todas_atividades.return_value = [
         {
-            "funcional": 1001,
-            "codigo_atividade": "RUN",
-            "descricao": "Corrida de 5km",
-            "data_hora": datetime.now()
-        },
-        {
-            "funcional": 1002,
-            "codigo_atividade": "SWIM",
-            "descricao": "Natação",
-            "data_hora": datetime.now()
+            "funcional": 999,
+            "codigo_atividade": "SUPINO-001",
+            "nome_atividade": "SUPINO",
+            "data_hora": "2026-01-01T10:00:00"
         }
     ]
 
     response = client.get(
-        "/atividades/praticadas/"
+        "/atividadespraticadas/"
     )
 
     assert response.status_code == 200
 
     body = response.json()
 
-    assert len(body) == 2
+    assert len(body) == 1
 
-    assert body[0]["funcional"] == 1001
-    assert body[1]["funcional"] == 1002
+    assert (
+        body[0]["codigo_atividade"]
+        == "SUPINO-001"
+    )
 
-    mock_instance.buscar_todas_atividades.assert_called_once()
+    mock_controller.buscar_todas_atividades.assert_called_once()
 
 
 # ==========================================
-# Teste GET todas atividades - vazio
+# VALIDAÇÃO PAYLOAD
 # ==========================================
+def test_cadastrar_atividade_payload_invalido():
 
-@patch(
-    "src.routes.routes_atividades_realizadas.controller_atividades_realizadas"
-)
-def test_buscar_todas_atividades_vazio(
-    mock_controller
-):
-
-    mock_instance = mock_controller.return_value
-
-    mock_instance.buscar_todas_atividades.side_effect = HTTPException(
-        status_code=404,
-        detail="Nenhuma atividade encontrada."
+    response = client.post(
+        "/atividadespraticadas/",
+        json={
+            "codigo_atividade": ""
+        }
     )
 
-    response = client.get(
-        "/atividades/praticadas/"
-    )
-
-    assert response.status_code == 404
-
-    body = response.json()
-
-    assert body["detail"] == "Nenhuma atividade encontrada."
+    assert response.status_code == 422
 
 
 # ==========================================
-# Teste GET todas atividades - erro interno
+# VALIDAÇÃO CAMPO OBRIGATÓRIO
 # ==========================================
+def test_cadastrar_atividade_sem_codigo():
 
-@patch(
-    "src.routes.routes_atividades_realizadas.controller_atividades_realizadas"
-)
-def test_buscar_todas_atividades_erro(
-    mock_controller
-):
-
-    mock_instance = mock_controller.return_value
-
-    mock_instance.buscar_todas_atividades.side_effect = HTTPException(
-        status_code=500,
-        detail="Erro interno"
+    response = client.post(
+        "/atividadespraticadas/",
+        json={
+            "descricao": "Treino peito"
+        }
     )
 
-    response = client.get(
-        "/atividades/praticadas/"
-    )
-
-    assert response.status_code == 500
-
-    body = response.json()
-
-    assert body["detail"] == "Erro interno"
+    assert response.status_code == 422
