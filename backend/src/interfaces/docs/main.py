@@ -1,65 +1,53 @@
-# src/docs/swagger_config.py
-
 # ==========================================
-
 # TAGS SWAGGER
-
 # ==========================================
 
-tags_metadata = [
-{
-"name": "Usuários",
-"description": (
-"Operações relacionadas a cadastro, "
-"autenticação e gerenciamento de usuários."
-)
-},
-{
-"name": "Atividades",
-"description": (
-"Gestão das atividades físicas "
-"disponíveis no sistema."
-)
-},
-{
-"name": "Atividades Praticadas",
-"description": (
-"Registro e consulta das atividades "
-"realizadas pelos usuários."
-)
-}
-]
+
 
 # ==========================================
-
 # CONFIGURAÇÃO OPENAPI
-
 # ==========================================
 
 SWAGGER_CONFIG = {
 
-"title": "Olympus API",
+    "title": "Olympus API",
 
-"description": (
-    "API para gerenciamento de atividades físicas "
-    "e controle de usuários.\n\n"
+    "description": (
+        "API REST desenvolvida para gerenciamento "
+        "de atividades físicas, autenticação segura "
+        "e análise inteligente de desempenho.\n\n"
 
-    "Sistema com autenticação JWT, "
-    "controle de acesso por usuário root "
-    "e proteção contra brute force."
-),
+        "## Funcionalidades\n"
 
-"version": "1.0.0",
+        "- Autenticação JWT\n"
+        "- Controle de acesso por perfil\n"
+        "- Registro de atividades físicas\n"
+        "- Histórico de atividades\n"
+        "- Integração com IA para análise de evolução\n"
+        "- Proteção contra brute force\n\n"
 
-"openapi_tags": tags_metadata,
+        "Projeto desenvolvido utilizando "
+        "FastAPI, SQLAlchemy e arquitetura em camadas."
+    ),
 
-"contact": {
-    "name": "Olympus Support",
-    "email": "suporte@olympus.api"
-},
+    "version": "2.0.0",
 
-"license_info": {
-    "name": "Proprietary"
-}
+    "docs_url": "/docs",
 
+    "redoc_url": "/redoc",
+
+    "openapi_url": "/openapi.json",
+
+    "contact": {
+        "name": "Jorge Miguel",
+        "email": "jorgemiguelaviles18122001@gmail.com"
+    },
+
+    "license_info": {
+        "name": "Proprietary"
+    },
+
+    "swagger_ui_parameters": {
+        "persistAuthorization": True
+    }
 }

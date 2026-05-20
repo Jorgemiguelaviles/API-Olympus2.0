@@ -1,9 +1,45 @@
-# src/interfaces/docs/docs_atividades.py
+from typing import List
 
 from src.interfaces.schemas.schema_atividades import (
+    AtividadeExistenteResponseSchema,
     AtividadeOpcaoResponseSchema
 )
 
+
+# ==========================================
+# DOC - BUSCAR OPÇÕES
+# ==========================================
+DOC_BUSCAR_OPCOES_ATIVIDADES = {
+
+    "response_model": List[AtividadeExistenteResponseSchema],
+
+    "summary": "Buscar atividades disponíveis",
+
+    "description": (
+        "Retorna todas as atividades físicas "
+        "disponíveis para seleção."
+    ),
+
+    "responses": {
+
+        200: {
+            "description": "Atividades recuperadas com sucesso."
+        },
+
+        404: {
+            "description": "Nenhuma atividade encontrada."
+        },
+
+        500: {
+            "description": "Erro interno do servidor."
+        }
+    }
+}
+
+
+# ==========================================
+# DOC - CADASTRAR OPÇÃO
+# ==========================================
 DOC_CADASTRAR_OPCAO_ATIVIDADE = {
 
     "response_model": AtividadeOpcaoResponseSchema,
@@ -11,7 +47,8 @@ DOC_CADASTRAR_OPCAO_ATIVIDADE = {
     "summary": "Cadastrar atividade",
 
     "description": (
-        "Cadastra uma nova atividade disponível no sistema."
+        "Cadastra uma nova atividade "
+        "disponível no sistema."
     ),
 
     "responses": {

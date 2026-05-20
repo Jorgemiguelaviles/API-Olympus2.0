@@ -1,64 +1,49 @@
-from pydantic import BaseModel
-from typing import Optional, List
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # ==========================================
-# RESPOSTA ATIVIDADE REALIZADA
-# ==========================================
-class AtividadeRespostaSchema(BaseModel):
-
-    funcional: int
-
-    codigo_atividade: str
-
-    nome_atividade: Optional[str]
-
-    data_hora: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# ==========================================
-# RESPOSTA COM IA
-# ==========================================
-class AtividadeComAnaliseSchema(BaseModel):
-
-    atividades: List[AtividadeRespostaSchema]
-
-    analise_ia: str
-
-
-# ==========================================
-# RESPOSTA ATIVIDADES DISPONÍVEIS
+# RESPONSE - ATIVIDADE DISPONÍVEL
 # ==========================================
 class AtividadeExistenteResponseSchema(BaseModel):
 
-    codigo_atividade: str
+    model_config = ConfigDict(from_attributes=True)
 
-    nome_atividade: str
+    codigo_atividade: str = Field(
+        ...,
+        example="musculacao-001"
+    )
 
-    class Config:
-        from_attributes = True
+    nome_atividade: str = Field(
+        ...,
+        example="Musculação"
+    )
 
 
 # ==========================================
-# CRIAÇÃO NOVA OPÇÃO
+# PAYLOAD - CRIAR OPÇÃO
 # ==========================================
 class AtividadeCriacaoOpcaoSchema(BaseModel):
 
-    descricao: str
+    descricao: str = Field(
+        ...,
+        min_length=3,
+        example="Natação"
+    )
 
 
 # ==========================================
-# RESPOSTA NOVA OPÇÃO
+# RESPONSE - OPÇÃO CRIADA
 # ==========================================
 class AtividadeOpcaoResponseSchema(BaseModel):
 
-    codigo_atividade: str
+    model_config = ConfigDict(from_attributes=True)
 
-    nome_atividade: str
+    codigo_atividade: str = Field(
+        ...,
+        example="natacao-001"
+    )
 
-    class Config:
-        from_attributes = True
+    nome_atividade: str = Field(
+        ...,
+        example="Natação"
+    )

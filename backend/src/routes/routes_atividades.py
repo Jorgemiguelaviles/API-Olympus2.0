@@ -1,48 +1,34 @@
-from typing import List
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from src.config.config_banco import get_db
 
-from src.interfaces.docs.docs_atividades import (
-    DOC_CADASTRAR_OPCAO_ATIVIDADE
+from src.interfaces.schemas.schema_atividades import (
+    AtividadeCriacaoOpcaoSchema
 )
 
-from src.interfaces.schemas.schema_atividades import (
-    AtividadeCriacaoOpcaoSchema,
-    AtividadeExistenteResponseSchema
+from src.interfaces.docs.docs_atividades import (
+    DOC_BUSCAR_OPCOES_ATIVIDADES,
+    DOC_CADASTRAR_OPCAO_ATIVIDADE
 )
 
 from src.contollers.controller_atividades import (
     controller_atividade_existente
 )
 
+
 roteador_atividades = APIRouter(
     prefix="/atividades",
-    tags=["Atividades"]
+    tags=["🏋️ Atividades"]
 )
 
 
 # ==========================================
-# BUSCAR OPÇÕES ok
+# BUSCAR OPÇÕES
 # ==========================================
 @roteador_atividades.get(
     "/opcoes",
-    response_model=List[AtividadeExistenteResponseSchema],
-    summary="Buscar atividades disponíveis",
-    description="Retorna as atividades disponíveis para seleção.",
-    responses={
-        200: {
-            "description": "Atividades recuperadas com sucesso."
-        },
-        404: {
-            "description": "Nenhuma atividade encontrada."
-        },
-        500: {
-            "description": "Erro interno do servidor."
-        }
-    }
+    **DOC_BUSCAR_OPCOES_ATIVIDADES
 )
 def buscar_opcoes_atividades(
     db: Session = Depends(get_db)
@@ -54,11 +40,11 @@ def buscar_opcoes_atividades(
 
 
 # ==========================================
-# CADASTRAR OPÇÃO ok
+# CADASTRAR OPÇÃO
 # ==========================================
 @roteador_atividades.post(
     "/opcoes",
-    status_code=201,
+    status_code=status.HTTP_201_CREATED,
     **DOC_CADASTRAR_OPCAO_ATIVIDADE
 )
 def cadastrar_opcao_atividade(

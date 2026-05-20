@@ -1,5 +1,7 @@
 from typing import List
 
+from fastapi import status
+
 from src.interfaces.schemas.schema_atividaddes_realizadas import (
     CadastroAtividadeResponseSchema,
     AtividadesPraticadasResponseSchema,
@@ -8,7 +10,7 @@ from src.interfaces.schemas.schema_atividaddes_realizadas import (
 
 
 # ==========================================
-# DOC CADASTRAR
+# CADASTRAR ATIVIDADE
 # ==========================================
 DOC_CADASTRAR_ATIVIDADE = {
 
@@ -17,24 +19,26 @@ DOC_CADASTRAR_ATIVIDADE = {
     "summary": "Cadastrar atividade realizada",
 
     "description": (
-        "Cria um novo registro de atividade física realizada."
+        "Cria um novo registro de atividade física."
     ),
+
+    "status_code": status.HTTP_201_CREATED,
 
     "responses": {
 
-        201: {
+        status.HTTP_201_CREATED: {
             "description": "Atividade cadastrada com sucesso."
         },
 
-        400: {
+        status.HTTP_400_BAD_REQUEST: {
             "description": "Dados inválidos."
         },
 
-        404: {
+        status.HTTP_404_NOT_FOUND: {
             "description": "Atividade não encontrada."
         },
 
-        500: {
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Erro interno."
         }
     }
@@ -42,29 +46,29 @@ DOC_CADASTRAR_ATIVIDADE = {
 
 
 # ==========================================
-# DOC BUSCAR POR FUNCIONAL
+# BUSCAR POR FUNCIONAL
 # ==========================================
 DOC_BUSCAR_POR_FUNCIONAL = {
 
     "response_model": AtividadesPraticadasResponseSchema,
 
-    "summary": "Buscar atividades por funcional",
+    "summary": "Buscar minhas atividades",
 
     "description": (
-        "Retorna todas as atividades vinculadas ao funcional."
+        "Retorna todas as atividades do usuário autenticado."
     ),
 
     "responses": {
 
-        200: {
+        status.HTTP_200_OK: {
             "description": "Atividades encontradas."
         },
 
-        404: {
+        status.HTTP_404_NOT_FOUND: {
             "description": "Nenhuma atividade encontrada."
         },
 
-        500: {
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Erro interno."
         }
     }
@@ -72,7 +76,7 @@ DOC_BUSCAR_POR_FUNCIONAL = {
 
 
 # ==========================================
-# DOC BUSCAR TODAS
+# BUSCAR TODAS
 # ==========================================
 DOC_BUSCAR_TODAS = {
 
@@ -81,20 +85,20 @@ DOC_BUSCAR_TODAS = {
     "summary": "Buscar todas as atividades",
 
     "description": (
-        "Retorna todas as atividades físicas registradas."
+        "Retorna todas as atividades registradas."
     ),
 
     "responses": {
 
-        200: {
+        status.HTTP_200_OK: {
             "description": "Lista retornada com sucesso."
         },
 
-        404: {
+        status.HTTP_404_NOT_FOUND: {
             "description": "Nenhuma atividade encontrada."
         },
 
-        500: {
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Erro interno."
         }
     }

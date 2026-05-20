@@ -19,9 +19,9 @@ from src.interfaces.schemas.schema_usuarios import (
 from src.interfaces.docs.docs_usuarios import (
     DOC_CADASTRAR_USUARIO,
     DOC_LOGIN_USUARIO,
+    DOC_LISTAR_USUARIOS,
     DOC_ALTERAR_CONFIGURACAO,
-    DOC_ATUALIZAR_USUARIO,
-    DOC_ALTERAR_CONFIGURACAO
+    DOC_ATUALIZAR_USUARIO
 )
 
 from src.contollers.controller_usuarios import (
@@ -29,14 +29,26 @@ from src.contollers.controller_usuarios import (
 )
 
 
+# ==========================================
+# ROUTER
+# ==========================================
 roteador_usuarios = APIRouter(
     prefix="/usuarios",
-    tags=["Usuários"]
+    tags=["👤 Usuários"]
 )
 
 
 # ==========================================
-# CADASTRO USUÁRIO - ok
+# DEPENDENCY
+# ==========================================
+def get_controller(
+    db: Session = Depends(get_db)
+):
+    return controller_usuarios(db)
+
+
+# ==========================================
+# CADASTRAR
 # ==========================================
 @roteador_usuarios.post(
     "/cadastro",
@@ -45,32 +57,16 @@ roteador_usuarios = APIRouter(
 )
 def cadastrar_usuario(
     payload: UsuarioCriacaoSchema,
-    db: Session = Depends(get_db)
+    controller = Depends(get_controller)
 ):
 
-    return controller_usuarios(db).cadastrar_usuario({
-        "usuario": payload.usuario,
-        "senha": payload.senha,
-        "nome": payload.nome
-    })
+    return controller.cadastrar_usuario(
+        payload.model_dump()
+    )
 
 
 # ==========================================
-# LISTAR USUÁRIOS - ok
-# ==========================================
-@roteador_usuarios.get(
-    "/listar"
-)
-def listar_usuarios(
-    page: int = Query(1, ge=1),
-    db: Session = Depends(get_db)
-):
-
-    return controller_usuarios(db).listar_usuarios(page)
-
-
-# ==========================================
-# LOGIN - ok
+# LOGIN
 # ==========================================
 @roteador_usuarios.post(
     "/login",
@@ -78,17 +74,35 @@ def listar_usuarios(
 )
 def login_usuario(
     payload: UsuarioLoginSchema,
-    db: Session = Depends(get_db)
+    controller = Depends(get_controller)
 ):
 
-    return controller_usuarios(db).login({
-        "usuario": payload.usuario,
-        "senha": payload.senha
-    })
+    return controller.login(
+        payload.model_dump()
+    )
 
 
 # ==========================================
-# ALTERAR CONFIGURAÇÃO - ok
+# LISTAR
+# ==========================================
+@roteador_usuarios.get(
+    "/listar",
+    **DOC_LISTAR_USUARIOS
+)
+def listar_usuarios(
+    page: int = Query(
+        1,
+        ge=1,
+        description="Número da página"
+    ),
+    controller = Depends(get_controller)
+):
+
+    return controller.listar_usuarios(page)
+
+
+# ==========================================
+# CONFIGURAÇÃO
 # ==========================================
 @roteador_usuarios.patch(
     "/configuracao",
@@ -96,17 +110,17 @@ def login_usuario(
 )
 def alterar_configuracao_usuario(
     payload: UsuarioConfiguracaoSchema,
-    db: Session = Depends(get_db)
+    controller = Depends(get_controller)
 ):
 
-    return controller_usuarios(db).alterar_configuracao_usuario(
+    return controller.alterar_configuracao_usuario(
         funcional=payload.funcional,
         campo=payload.campo
     )
 
 
 # ==========================================
-# ATUALIZAR USUÁRIO - ok
+# ATUALIZAR
 # ==========================================
 @roteador_usuarios.put(
     "/",
@@ -114,15 +128,10 @@ def alterar_configuracao_usuario(
 )
 def atualizar_usuario(
     payload: UsuarioAtualizacaoSchema,
-    db: Session = Depends(get_db)
+    controller = Depends(get_controller)
 ):
 
-    return controller_usuarios(db).atualizar_usuario(
+    return controller.atualizar_usuario(
         funcional=payload.funcional,
-        payload={
-            "nome": payload.nome,
-            "usuario": payload.usuario,
-            "senha": payload.senha,
-            "funcional": payload.funcional
-        }
+        payload=payload.model_dump()
     )

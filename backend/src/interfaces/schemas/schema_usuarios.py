@@ -1,79 +1,148 @@
-# src/interfaces/schemas/schema_usuarios.py
-
-from pydantic import BaseModel, EmailStr, Field,BaseModel
 from typing import Optional, Literal
 
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    ConfigDict
+)
+
+
 # ==========================================
-# Cadastro
+# CADASTRO
 # ==========================================
 class UsuarioCriacaoSchema(BaseModel):
 
-    usuario: str = Field(..., example="jorge@gmail.com")
-    senha: str = Field(..., example="Vava@0909")
-    nome: str = Field(..., example="Jorge Miguel")
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "usuario": "jorge@gmail.com",
+                "senha": "Vava@0909",
+                "nome": "Jorge Miguel"
+            }
+        }
+    )
+
+    usuario: EmailStr = Field(
+        ...,
+        description="Email do usuário"
+    )
+
+    senha: str = Field(
+        ...,
+        min_length=6,
+        description="Senha de autenticação"
+    )
+
+    nome: str = Field(
+        ...,
+        min_length=3,
+        max_length=100,
+        description="Nome completo do usuário"
+    )
 
 
 # ==========================================
-# Resposta padrão
+# LOGIN
+# ==========================================
+class UsuarioLoginSchema(BaseModel):
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "usuario": "jorge@gmail.com",
+                "senha": "123456"
+            }
+        }
+    )
+
+    usuario: EmailStr = Field(
+        ...,
+        description="Email do usuário"
+    )
+
+    senha: str = Field(
+        ...,
+        description="Senha do usuário"
+    )
+
+
+# ==========================================
+# RESPONSE PADRÃO
 # ==========================================
 class UsuarioRespostaSchema(BaseModel):
 
-    funcional: int
-    usuario: str
-    nome: str
-    usuario_root: bool
-    usuario_ativado: bool
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    funcional: int = Field(
+        description="Identificador funcional"
+    )
 
+    usuario: str = Field(
+        description="Email/login do usuário"
+    )
 
-# ==========================================
-# Listagem paginada
-# ==========================================
-class UsuarioListagemSchema(BaseModel):
+    nome: str = Field(
+        description="Nome completo"
+    )
 
-    funcional: int
-    usuario: str
-    nome: str
-    usuario_root: bool
-    usuario_ativado: bool
+    usuario_root: bool = Field(
+        description="Define se o usuário possui acesso ROOT"
+    )
 
-    class Config:
-        from_attributes = True
-
-class UsuarioLoginSchema(BaseModel):
-    usuario: str = Field(..., example="jorge@gmail.com")
-    senha: str = Field(..., example="123456")
-
-
-
+    usuario_ativado: bool = Field(
+        description="Define se o usuário está ativo"
+    )
 
 
 # ==========================================
-# ALTERAR ROOT
+# LISTAGEM
 # ==========================================
-class UsuarioAlterarRootSchema(BaseModel):
-
-    funcional: int
-
-    usuario_root: bool
+class UsuarioListagemSchema(UsuarioRespostaSchema):
+    pass
 
 
 # ==========================================
-# ALTERAR STATUS
+# ALTERAR CONFIGURAÇÃO
 # ==========================================
-class UsuarioAlterarStatusSchema(BaseModel):
+class UsuarioConfiguracaoSchema(BaseModel):
 
-    funcional: int
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "funcional": 100000000,
+                "campo": "usuario_root"
+            }
+        }
+    )
 
-    usuario_ativado: bool
+    funcional: int = Field(
+        description="Funcional do usuário"
+    )
+
+    campo: Literal[
+        "usuario_root",
+        "usuario_ativado"
+    ] = Field(
+        description="Campo que será alterado"
+    )
 
 
 # ==========================================
-# ATUALIZAR DADOS
+# ATUALIZAR USUÁRIO
 # ==========================================
 class UsuarioAtualizacaoSchema(BaseModel):
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "funcional": 100000000,
+                "nome": "Jorge Miguel",
+                "usuario": "jorge@gmail.com",
+                "senha": "novaSenha123"
+            }
+        }
+    )
 
     funcional: int
 
@@ -82,13 +151,3 @@ class UsuarioAtualizacaoSchema(BaseModel):
     usuario: Optional[EmailStr] = None
 
     senha: Optional[str] = None
-
-
-class UsuarioConfiguracaoSchema(BaseModel):
-
-    funcional: int
-
-    campo: Literal[
-        "usuario_root",
-        "usuario_ativado"
-    ]

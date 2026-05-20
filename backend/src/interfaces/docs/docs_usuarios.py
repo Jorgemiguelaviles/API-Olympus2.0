@@ -1,15 +1,16 @@
-# src/interfaces/docs/docs_usuarios.py
-
 from fastapi import status
 
 from src.interfaces.schemas.schema_usuarios import (
-    UsuarioListagemSchema,
-    UsuarioRespostaSchema
+    UsuarioRespostaSchema,
+    UsuarioListagemSchema
 )
 
 
-
+# ==========================================
+# CADASTRAR USUÁRIO
+# ==========================================
 DOC_CADASTRAR_USUARIO = {
+
     "response_model": UsuarioRespostaSchema,
 
     "summary": "Cadastrar usuário",
@@ -19,20 +20,9 @@ DOC_CADASTRAR_USUARIO = {
     ),
 
     "responses": {
-        status.HTTP_201_CREATED: {
-            "description": "Usuário cadastrado com sucesso.",
 
-            "content": {
-                "application/json": {
-                    "example": {
-                        "funcional": 1,
-                        "usuario": "jorge",
-                        "nome": "Jorge Miguel",
-                        "usuario_root": False,
-                        "usuario_ativado": True
-                    }
-                }
-            }
+        status.HTTP_201_CREATED: {
+            "description": "Usuário cadastrado com sucesso."
         },
 
         status.HTTP_400_BAD_REQUEST: {
@@ -40,75 +30,30 @@ DOC_CADASTRAR_USUARIO = {
         },
 
         status.HTTP_409_CONFLICT: {
-            "description": "Usuário já existe."
-        },
-
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Erro interno ao cadastrar usuário."
+            "description": "Usuário já existente."
         }
     }
 }
 
 
-
-
-DOC_LISTAR_USUARIOS = {
-    "response_model": list[UsuarioListagemSchema],
-
-    "summary": "Listar usuários paginados",
-
-    "description": "Retorna usuários paginados de 10 em 10 registros.",
-
-    "responses": {
-        status.HTTP_200_OK: {
-            "description": "Usuários retornados com sucesso.",
-            "content": {
-                "application/json": {
-                    "example": [
-                        {
-                            "funcional": 1,
-                            "usuario": "jorge",
-                            "nome": "Jorge Miguel",
-                            "usuario_root": False,
-                            "usuario_ativado": True
-                        }
-                    ]
-                }
-            }
-        },
-
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "Parâmetro de página inválido."
-        },
-
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Erro interno ao listar usuários."
-        }
-    }
-}
-
+# ==========================================
+# LOGIN
+# ==========================================
 DOC_LOGIN_USUARIO = {
 
-    "summary": "Login do usuário",
+    "summary": "Autenticar usuário",
 
     "description": (
-        "Autentica usuário e retorna JWT."
+        "Realiza autenticação e retorna JWT."
     ),
 
     "responses": {
-        200: {
-            "description": "Login realizado com sucesso.",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "access_token": "eyJhbGciOiJSUzI1NiIs...",
-                        "token_type": "bearer"
-                    }
-                }
-            }
+
+        status.HTTP_200_OK: {
+            "description": "Login realizado com sucesso."
         },
 
-        401: {
+        status.HTTP_401_UNAUTHORIZED: {
             "description": "Credenciais inválidas."
         }
     }
@@ -116,36 +61,30 @@ DOC_LOGIN_USUARIO = {
 
 
 # ==========================================
-# ALTERAR ROOT
+# LISTAR USUÁRIOS
 # ==========================================
-DOC_ALTERAR_ROOT = {
-    "summary": "Alterar permissão ROOT",
-    "description": "Ativa ou remove permissão ROOT do usuário.",
-    "responses": {
-        200: {
-            "description": "Permissão alterada com sucesso."
-        },
-        404: {
-            "description": "Usuário não encontrado."
-        }
-    }
+DOC_LISTAR_USUARIOS = {
+
+    "response_model": list[UsuarioListagemSchema],
+
+    "summary": "Listar usuários",
+
+    "description": (
+        "Retorna usuários paginados."
+    )
 }
 
 
 # ==========================================
-# ALTERAR STATUS
+# ALTERAR CONFIGURAÇÃO
 # ==========================================
-DOC_ALTERAR_STATUS = {
-    "summary": "Ativar ou desativar usuário",
-    "description": "Ativa ou desativa acesso do usuário.",
-    "responses": {
-        200: {
-            "description": "Status alterado com sucesso."
-        },
-        404: {
-            "description": "Usuário não encontrado."
-        }
-    }
+DOC_ALTERAR_CONFIGURACAO = {
+
+    "summary": "Alterar configuração do usuário",
+
+    "description": (
+        "Altera permissões e status do usuário."
+    )
 }
 
 
@@ -153,55 +92,10 @@ DOC_ALTERAR_STATUS = {
 # ATUALIZAR USUÁRIO
 # ==========================================
 DOC_ATUALIZAR_USUARIO = {
+
     "summary": "Atualizar usuário",
-    "description": "Atualiza nome, email e senha do usuário.",
-    "responses": {
-        200: {
-            "description": "Usuário atualizado com sucesso."
-        },
-        404: {
-            "description": "Usuário não encontrado."
-        }
-    }
-}
-
-# ==========================================
-# DOC ALTERAR CONFIGURAÇÃO USUÁRIO
-# ==========================================
-
-DOC_ALTERAR_CONFIGURACAO = {
-
-    "summary": "Alterar configuração do usuário",
 
     "description": (
-        "Permite alterar configurações do usuário, "
-        "como permissão root ou status de ativação."
-    ),
-
-    "responses": {
-
-        200: {
-            "description": "Configuração alterada com sucesso."
-        },
-
-        400: {
-            "description": "Campo inválido para alteração."
-        },
-
-        401: {
-            "description": "Não autenticado."
-        },
-
-        403: {
-            "description": "Sem permissão."
-        },
-
-        404: {
-            "description": "Usuário não encontrado."
-        },
-
-        500: {
-            "description": "Erro interno do servidor."
-        }
-    }
+        "Atualiza dados do usuário."
+    )
 }

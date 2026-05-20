@@ -1,6 +1,11 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import (
+    APIRouter,
+    Depends,
+    Request
+)
+
 from sqlalchemy.orm import Session
 
 from src.config.config_banco import get_db
@@ -20,10 +25,22 @@ from src.contollers.controller_atividades_realizadas import (
 )
 
 
+# ==========================================
+# ROUTER
+# ==========================================
 roteador_atividades_praticadas = APIRouter(
     prefix="/atividadespraticadas",
-    tags=["Atividades Praticadas"]
+    tags=["📊 Atividades Praticadas"]
 )
+
+
+# ==========================================
+# DEPENDENCY
+# ==========================================
+def get_controller(
+    db: Session = Depends(get_db)
+):
+    return controller_atividades_realizadas(db)
 
 
 # ==========================================
@@ -36,7 +53,7 @@ roteador_atividades_praticadas = APIRouter(
 def cadastrar_atividade(
     payload: AtividadeCriacaoSchema,
     request: Request,
-    db: Session = Depends(get_db)
+    controller = Depends(get_controller)
 ):
 
     user = request.state.user
@@ -48,9 +65,7 @@ def cadastrar_atividade(
         "data_hora": datetime.now()
     }
 
-    return controller_atividades_realizadas(
-        db
-    ).cadastrar_atividade(
+    return controller.cadastrar_atividade(
         nova_atividade
     )
 
@@ -64,29 +79,25 @@ def cadastrar_atividade(
 )
 def buscar_minhas_atividades(
     request: Request,
-    db: Session = Depends(get_db)
+    controller = Depends(get_controller)
 ):
 
     user = request.state.user
 
-    return controller_atividades_realizadas(
-        db
-    ).buscar_por_funcional(
+    return controller.buscar_por_funcional(
         user["funcional"]
     )
 
 
 # ==========================================
-# BUSCAR TODAS AS ATIVIDADES
+# BUSCAR TODAS
 # ==========================================
 @roteador_atividades_praticadas.get(
     "/",
     **DOC_BUSCAR_TODAS
 )
 def buscar_todas_atividades(
-    db: Session = Depends(get_db)
+    controller = Depends(get_controller)
 ):
 
-    return controller_atividades_realizadas(
-        db
-    ).buscar_todas_atividades()
+    return controller.buscar_todas_atividades()

@@ -1,4 +1,6 @@
-- swegger API aprimorar os schemas
-- finalizar a cobertura dos testes unitarios
+
 - atualizar a documentação
+
+- finalizar a cobertura dos testes unitarios
+
 - finalizar o power point
