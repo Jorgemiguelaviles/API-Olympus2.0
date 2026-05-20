@@ -1,7 +1,7 @@
 # src/interfaces/schemas/schema_usuarios.py
 
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from pydantic import BaseModel, EmailStr, Field,BaseModel
+from typing import Optional, Literal
 
 # ==========================================
 # Cadastro
@@ -82,3 +82,13 @@ class UsuarioAtualizacaoSchema(BaseModel):
     usuario: Optional[EmailStr] = None
 
     senha: Optional[str] = None
+
+
+class UsuarioConfiguracaoSchema(BaseModel):
+
+    funcional: int
+
+    campo: Literal[
+        "usuario_root",
+        "usuario_ativado"
+    ]

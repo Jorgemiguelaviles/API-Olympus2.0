@@ -162,8 +162,7 @@ class controller_usuarios:
     def alterar_configuracao_usuario(
         self,
         funcional: int,
-        campo: str,
-        valor: bool
+        campo: str
     ):
 
         try:
@@ -178,8 +177,7 @@ class controller_usuarios:
             # update
             return self.usuario_service.alterar_configuracao_usuario(
                 funcional,
-                campo,
-                valor
+                campo
             )
 
         except HTTPException:
@@ -203,16 +201,11 @@ class controller_usuarios:
 
         try:
 
-            # valida funcional
-            service_validacao_estados().validar(
-                funcional,
-                self.db
-            )
-
             # valida dados atualização
             dados_atualizacao = (
-                service_validacao_atualizacao_usuario().validar_atualizações(
-                    payload
+                service_validacao_atualizacao_usuario().validar_atualizacoes(
+                    payload,
+                    self.db
                 )
             )
 

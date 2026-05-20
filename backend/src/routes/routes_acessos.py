@@ -20,7 +20,8 @@ from src.interfaces.docs.docs_usuarios import (
     DOC_CADASTRAR_USUARIO,
     DOC_LOGIN_USUARIO,
     DOC_ALTERAR_CONFIGURACAO,
-    DOC_ATUALIZAR_USUARIO
+    DOC_ATUALIZAR_USUARIO,
+    DOC_ALTERAR_CONFIGURACAO
 )
 
 from src.contollers.controller_usuarios import (
@@ -100,8 +101,7 @@ def alterar_configuracao_usuario(
 
     return controller_usuarios(db).alterar_configuracao_usuario(
         funcional=payload.funcional,
-        campo=payload.campo,
-        valor=payload.valor
+        campo=payload.campo
     )
 
 
@@ -122,6 +122,7 @@ def atualizar_usuario(
         payload={
             "nome": payload.nome,
             "usuario": payload.usuario,
-            "senha": payload.senha
+            "senha": payload.senha,
+            "funcional": payload.funcional
         }
     )

@@ -2,18 +2,61 @@ import re
 
 from fastapi import HTTPException
 
+from src.models.model_usuarios import (
+    model_usuarios
+)
+
 
 class service_validacao_atualizacao_usuario:
 
     # ==========================================
     # VALIDAR UPDATE USUÁRIO
     # ==========================================
-    def validar_atualizações(
+    def validar_atualizacoes(
         self,
-        payload: dict
+        payload: dict,
+        db
     ):
 
-        dados_atualizacao = {}
+        # ==========================================
+        # VALIDAR FUNCIONAL
+        # ==========================================
+        funcional = payload.get("funcional")
+
+        if funcional is None:
+
+            raise HTTPException(
+                status_code=400,
+                detail="Funcional é obrigatória."
+            )
+
+        # ==========================================
+        # VALIDAR NUMÉRICO
+        # ==========================================
+        if not str(funcional).isdigit():
+
+            raise HTTPException(
+                status_code=400,
+                detail="A funcional deve ser numérica."
+            )
+
+        funcional = int(funcional)
+
+        # ==========================================
+        # VALIDAR EXISTÊNCIA
+        # ==========================================
+        usuario_existente = db.query(
+            model_usuarios
+        ).filter(
+            model_usuarios.funcional == funcional
+        ).first()
+
+        if not usuario_existente:
+
+            raise HTTPException(
+                status_code=404,
+                detail="Usuário não encontrado."
+            )
 
         # ==========================================
         # NOME
@@ -51,6 +94,23 @@ class service_validacao_atualizacao_usuario:
                     detail="Formato de email inválido."
                 )
 
+            # ==========================================
+            # EMAIL JÁ EXISTE
+            # ==========================================
+            email_existente = db.query(
+                model_usuarios
+            ).filter(
+                model_usuarios.usuario == usuario,
+                model_usuarios.funcional != funcional
+            ).first()
+
+            if email_existente:
+
+                raise HTTPException(
+                    status_code=400,
+                    detail="Email já cadastrado."
+                )
+
             dados_atualizacao["usuario"] = usuario
 
         # ==========================================
@@ -60,7 +120,10 @@ class service_validacao_atualizacao_usuario:
 
         if senha is not None:
 
-            regex_senha = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$'
+            regex_senha = (
+                r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)'
+                r'(?=.*[^A-Za-z0-9]).{8,}$'
+            )
 
             if not re.match(regex_senha, senha):
 

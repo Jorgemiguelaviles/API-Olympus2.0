@@ -164,3 +164,44 @@ DOC_ATUALIZAR_USUARIO = {
         }
     }
 }
+
+# ==========================================
+# DOC ALTERAR CONFIGURAÇÃO USUÁRIO
+# ==========================================
+
+DOC_ALTERAR_CONFIGURACAO = {
+
+    "summary": "Alterar configuração do usuário",
+
+    "description": (
+        "Permite alterar configurações do usuário, "
+        "como permissão root ou status de ativação."
+    ),
+
+    "responses": {
+
+        200: {
+            "description": "Configuração alterada com sucesso."
+        },
+
+        400: {
+            "description": "Campo inválido para alteração."
+        },
+
+        401: {
+            "description": "Não autenticado."
+        },
+
+        403: {
+            "description": "Sem permissão."
+        },
+
+        404: {
+            "description": "Usuário não encontrado."
+        },
+
+        500: {
+            "description": "Erro interno do servidor."
+        }
+    }
+}

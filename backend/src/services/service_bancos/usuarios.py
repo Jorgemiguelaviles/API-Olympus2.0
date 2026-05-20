@@ -27,7 +27,9 @@ class service_usuarios:
             )
 
             self.db.add(novo_usuario)
+
             self.db.commit()
+
             self.db.refresh(novo_usuario)
 
             return {
@@ -55,6 +57,7 @@ class service_usuarios:
             page = 1
 
         limit = 10
+
         offset = (page - 1) * limit
 
         usuarios = (
@@ -86,28 +89,38 @@ class service_usuarios:
 
         try:
 
-            usuario = self.db.query(
-                model_usuarios
-            ).filter(
-                model_usuarios.funcional == funcional
-            ).first()
+            usuario = (
+                self.db.query(model_usuarios)
+                .filter(
+                    model_usuarios.funcional == funcional
+                )
+                .first()
+            )
 
-            # alterna boolean
-            valor_atual = getattr(usuario, campo)
+            # ==========================================
+            # TOGGLE BOOLEAN
+            # ==========================================
+            valor_atual = getattr(
+                usuario,
+                campo
+            )
+
+            novo_valor = not valor_atual
 
             setattr(
                 usuario,
                 campo,
-                not valor_atual
+                novo_valor
             )
 
             self.db.commit()
+
             self.db.refresh(usuario)
 
             return {
                 "message": f"{campo} atualizado com sucesso.",
                 "funcional": usuario.funcional,
-                campo: getattr(usuario, campo)
+                campo: novo_valor
             }
 
         except SQLAlchemyError as erro:
@@ -129,16 +142,22 @@ class service_usuarios:
 
         try:
 
-            usuario = self.db.query(
-                model_usuarios
-            ).filter(
-                model_usuarios.funcional == funcional
-            ).first()
+            usuario = (
+                self.db.query(model_usuarios)
+                .filter(
+                    model_usuarios.funcional == funcional
+                )
+                .first()
+            )
 
             # ==========================================
             # UPDATE DINÂMICO
             # ==========================================
             for chave, valor in payload.items():
+
+                # ignora campos vazios
+                if valor is None:
+                    continue
 
                 setattr(
                     usuario,
@@ -147,6 +166,7 @@ class service_usuarios:
                 )
 
             self.db.commit()
+
             self.db.refresh(usuario)
 
             return {
