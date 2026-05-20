@@ -1,20 +1,18 @@
-# src/interfaces/docs/docs_atividades.py
-
 from typing import List
 
-from src.interfaces.schemas.schema_atividades import (
-    AtividadeRespostaSchema,
-    AtividadeComAnaliseSchema
+from src.interfaces.schemas.schema_atividaddes_realizadas import (
+    CadastroAtividadeResponseSchema,
+    AtividadesPraticadasResponseSchema,
+    AtividadeResponseSchema
 )
 
 
 # ==========================================
 # DOC CADASTRAR
 # ==========================================
-
 DOC_CADASTRAR_ATIVIDADE = {
 
-    "response_model": AtividadeRespostaSchema,
+    "response_model": CadastroAtividadeResponseSchema,
 
     "summary": "Cadastrar atividade realizada",
 
@@ -46,10 +44,9 @@ DOC_CADASTRAR_ATIVIDADE = {
 # ==========================================
 # DOC BUSCAR POR FUNCIONAL
 # ==========================================
-
 DOC_BUSCAR_POR_FUNCIONAL = {
 
-    "response_model": AtividadeComAnaliseSchema,
+    "response_model": AtividadesPraticadasResponseSchema,
 
     "summary": "Buscar atividades por funcional",
 
@@ -77,10 +74,9 @@ DOC_BUSCAR_POR_FUNCIONAL = {
 # ==========================================
 # DOC BUSCAR TODAS
 # ==========================================
-
 DOC_BUSCAR_TODAS = {
 
-    "response_model": List[AtividadeRespostaSchema],
+    "response_model": List[AtividadeResponseSchema],
 
     "summary": "Buscar todas as atividades",
 

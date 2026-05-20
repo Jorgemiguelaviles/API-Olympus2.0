@@ -1,10 +1,4 @@
-- atualizar os dados dos demais usuarios se for usuario root
-- desativar um usuario caso seja um usuario do tipo root
-- recuperar funcional apenas por token
-
-- garantir os testes do swegger API
-- garantir os testes unitarios 
-- atualizar requirements.txt
-- garantir que a doc esteja devidamente alinhada
-
-
+- swegger API aprimorar os schemas
+- finalizar a cobertura dos testes unitarios
+- atualizar a documentação
+- finalizar o power point

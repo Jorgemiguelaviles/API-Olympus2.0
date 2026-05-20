@@ -18,23 +18,20 @@ class service_validacao_atualizacao_usuario:
         db
     ):
 
+        dados_atualizacao = {}  # 🔥 FIX PRINCIPAL
+
         # ==========================================
         # VALIDAR FUNCIONAL
         # ==========================================
         funcional = payload.get("funcional")
 
         if funcional is None:
-
             raise HTTPException(
                 status_code=400,
                 detail="Funcional é obrigatória."
             )
 
-        # ==========================================
-        # VALIDAR NUMÉRICO
-        # ==========================================
         if not str(funcional).isdigit():
-
             raise HTTPException(
                 status_code=400,
                 detail="A funcional deve ser numérica."
@@ -42,17 +39,11 @@ class service_validacao_atualizacao_usuario:
 
         funcional = int(funcional)
 
-        # ==========================================
-        # VALIDAR EXISTÊNCIA
-        # ==========================================
-        usuario_existente = db.query(
-            model_usuarios
-        ).filter(
+        usuario_existente = db.query(model_usuarios).filter(
             model_usuarios.funcional == funcional
         ).first()
 
         if not usuario_existente:
-
             raise HTTPException(
                 status_code=404,
                 detail="Usuário não encontrado."
@@ -68,7 +59,6 @@ class service_validacao_atualizacao_usuario:
             nome = nome.strip()
 
             if len(nome) < 3:
-
                 raise HTTPException(
                     status_code=400,
                     detail="Nome deve possuir ao menos 3 caracteres."
@@ -88,24 +78,17 @@ class service_validacao_atualizacao_usuario:
             regex_email = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 
             if not re.match(regex_email, usuario):
-
                 raise HTTPException(
                     status_code=400,
                     detail="Formato de email inválido."
                 )
 
-            # ==========================================
-            # EMAIL JÁ EXISTE
-            # ==========================================
-            email_existente = db.query(
-                model_usuarios
-            ).filter(
+            email_existente = db.query(model_usuarios).filter(
                 model_usuarios.usuario == usuario,
                 model_usuarios.funcional != funcional
             ).first()
 
             if email_existente:
-
                 raise HTTPException(
                     status_code=400,
                     detail="Email já cadastrado."
@@ -126,7 +109,6 @@ class service_validacao_atualizacao_usuario:
             )
 
             if not re.match(regex_senha, senha):
-
                 raise HTTPException(
                     status_code=400,
                     detail=(
@@ -142,7 +124,6 @@ class service_validacao_atualizacao_usuario:
         # NADA ENVIADO
         # ==========================================
         if not dados_atualizacao:
-
             raise HTTPException(
                 status_code=400,
                 detail="Nenhum campo enviado para atualização."

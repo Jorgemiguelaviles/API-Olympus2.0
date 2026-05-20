@@ -1,12 +1,7 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    Request
-)
-
-from sqlalchemy.orm import Session
-
 from datetime import datetime
+
+from fastapi import APIRouter, Depends, Request
+from sqlalchemy.orm import Session
 
 from src.config.config_banco import get_db
 
@@ -26,13 +21,13 @@ from src.contollers.controller_atividades_realizadas import (
 
 
 roteador_atividades_praticadas = APIRouter(
-    prefix="/atividades/praticadas",
+    prefix="/atividadespraticadas",
     tags=["Atividades Praticadas"]
 )
 
 
 # ==========================================
-# CADASTRO
+# CADASTRAR ATIVIDADE
 # ==========================================
 @roteador_atividades_praticadas.post(
     "/",
@@ -47,23 +42,17 @@ def cadastrar_atividade(
     user = request.state.user
 
     nova_atividade = {
-
         "funcional": user["funcional"],
-
         "codigo_atividade": payload.codigo_atividade,
-
         "descricao": payload.descricao,
-
         "data_hora": datetime.now()
     }
 
-    controller_atividades_realizadas(
+    return controller_atividades_realizadas(
         db
     ).cadastrar_atividade(
         nova_atividade
     )
-
-    return nova_atividade
 
 
 # ==========================================
@@ -88,7 +77,7 @@ def buscar_minhas_atividades(
 
 
 # ==========================================
-# BUSCAR TODAS
+# BUSCAR TODAS AS ATIVIDADES
 # ==========================================
 @roteador_atividades_praticadas.get(
     "/",

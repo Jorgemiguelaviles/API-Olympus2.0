@@ -36,7 +36,7 @@ roteador_usuarios = APIRouter(
 
 
 # ==========================================
-# CADASTRO USUÁRIO
+# CADASTRO USUÁRIO - ok
 # ==========================================
 @roteador_usuarios.post(
     "/cadastro",
@@ -56,7 +56,7 @@ def cadastrar_usuario(
 
 
 # ==========================================
-# LISTAR USUÁRIOS
+# LISTAR USUÁRIOS - ok
 # ==========================================
 @roteador_usuarios.get(
     "/listar"
@@ -70,7 +70,7 @@ def listar_usuarios(
 
 
 # ==========================================
-# LOGIN
+# LOGIN - ok
 # ==========================================
 @roteador_usuarios.post(
     "/login",
@@ -88,7 +88,7 @@ def login_usuario(
 
 
 # ==========================================
-# ALTERAR CONFIGURAÇÃO
+# ALTERAR CONFIGURAÇÃO - ok
 # ==========================================
 @roteador_usuarios.patch(
     "/configuracao",
@@ -106,7 +106,7 @@ def alterar_configuracao_usuario(
 
 
 # ==========================================
-# ATUALIZAR USUÁRIO
+# ATUALIZAR USUÁRIO - ok
 # ==========================================
 @roteador_usuarios.put(
     "/",

@@ -25,7 +25,7 @@ roteador_atividades = APIRouter(
 
 
 # ==========================================
-# BUSCAR OPÇÕES
+# BUSCAR OPÇÕES ok
 # ==========================================
 @roteador_atividades.get(
     "/opcoes",
@@ -54,7 +54,7 @@ def buscar_opcoes_atividades(
 
 
 # ==========================================
-# CADASTRAR OPÇÃO
+# CADASTRAR OPÇÃO ok
 # ==========================================
 @roteador_atividades.post(
     "/opcoes",

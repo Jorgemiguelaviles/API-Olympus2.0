@@ -2,12 +2,11 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, HTTPException
 from jose import jwt
 import os
-
 from dotenv import load_dotenv
+
 load_dotenv()
 
 PUBLIC_KEY = open(os.getenv("PUBLIC_KEY_PATH")).read()
-
 ALGORITHM = "RS256"
 
 
@@ -21,13 +20,16 @@ PUBLIC_ROUTES = {
     "/openapi.json"
 }
 
+# normaliza removendo barra final
+PUBLIC_ROUTES = {r.rstrip("/") for r in PUBLIC_ROUTES}
+
 
 # ==========================================
 # ROTAS LIBERADAS PARA USER COMUM
 # ==========================================
 USER_ALLOWED_ROUTES = {
-    "POST:/atividades/praticadas",
-    "GET:/atividades/opcoes"
+    ("POST", "/atividadespraticadas"),
+    ("GET", "/atividades/opcoes"),
 }
 
 
@@ -39,13 +41,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # NORMALIZAÇÃO
         # ==========================================
         path = request.url.path.rstrip("/")
-
         if path == "":
             path = "/"
 
         method = request.method
 
-        route_key = f"{method}:{path}"
+        route_key = (method, path)
 
         # ==========================================
         # ROTAS PÚBLICAS
@@ -65,8 +66,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
             )
 
         try:
+            scheme, token = auth.split(" ")
 
-            token = auth.split(" ")[1]
+            if scheme.lower() != "bearer":
+                raise HTTPException(
+                    status_code=401,
+                    detail="Formato de autenticação inválido"
+                )
 
             payload = jwt.decode(
                 token,
@@ -74,8 +80,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 algorithms=[ALGORITHM]
             )
 
-        except Exception:
+        except ValueError:
+            raise HTTPException(
+                status_code=401,
+                detail="Header Authorization inválido"
+            )
 
+        except Exception:
             raise HTTPException(
                 status_code=401,
                 detail="Token inválido"
@@ -85,7 +96,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # USUÁRIO ATIVO
         # ==========================================
         if not payload.get("usuario_ativado", False):
-
             raise HTTPException(
                 status_code=403,
                 detail="Usuário desativado"
@@ -106,16 +116,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # USER COMUM
         # ==========================================
 
-        # 1. ROTAS EXATAS
+        # ROTAS EXATAS
         if route_key in USER_ALLOWED_ROUTES:
             return await call_next(request)
 
-        # 2. GET /atividades/praticadas/{id}
+        # GET /atividadespraticadas/{id}
         if (
             method == "GET"
-            and path.startswith("/atividades/praticadas/")
+            and path.startswith("/atividadespraticadas/")
         ):
-
             return await call_next(request)
 
         # ==========================================
