@@ -17,19 +17,35 @@ class service_usuarios:
 
         try:
 
+            # ==========================================
+            # VERIFICA SE EXISTE ALGUM USUÁRIO
+            # ==========================================
+            usuario_existe = (
+                self.db.query(model_usuarios)
+                .first()
+            )
+
+            is_primeiro_usuario = usuario_existe is None
+
             novo_usuario = model_usuarios(
 
                 usuario=payload.get("usuario"),
                 senha_hash=payload.get("senha_hash"),
                 nome=payload.get("nome"),
-                usuario_root=payload.get("usuario_root", False),
+
+                # ==========================================
+                # PRIMEIRO USUÁRIO SEMPRE ROOT
+                # ==========================================
+                usuario_root=(
+                    True if is_primeiro_usuario
+                    else payload.get("usuario_root", False)
+                ),
+
                 usuario_ativado=payload.get("usuario_ativado", True)
             )
 
             self.db.add(novo_usuario)
-
             self.db.commit()
-
             self.db.refresh(novo_usuario)
 
             return {
@@ -41,9 +57,7 @@ class service_usuarios:
             }
 
         except SQLAlchemyError as erro:
-
             self.db.rollback()
-
             raise Exception(
                 f"Erro ao salvar usuário no banco: {str(erro)}"
             )
