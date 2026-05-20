@@ -1,2 +1,0 @@
-- finalizar os testes unitarios
-- criar o requirement.txt das dependencias python

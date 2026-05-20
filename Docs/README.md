@@ -83,6 +83,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Gerar chaves
+
+```bash
+python "security\generate_keys.py"
+```
+
+com isso você ira grar um par de chaves sendo uma publica e uma privada, a publica pode vir servir para seu futuro frontend enquanto a privada serve exclusivamente para o seu backend, aonde você ir fazer o apontamento da mesma em suas variaveis de ambiente
+
+
+
 ### Rodar servidor
 
 ```bash
@@ -115,6 +125,9 @@ DB_PASSWORD=
 DB_HOST=
 DB_PORT=
 DB_NAME=
+API_KEY_GEMINI=
+PRIVATE_KEY_PATH=
+PUBLIC_KEY_PATH=
 ```
 
 ---
@@ -123,11 +136,13 @@ DB_NAME=
 
 A API gerencia:
 
-- autenticação de usuários (será adicionado na versão 2.0)
+- autenticação de usuários
 - cadastro de atividades físicas
 - associação de atividades por categoria/tag
 - registro de atividades executadas
 - consulta de histórico
+- gerenciamento de usuários
+- gerenciamento de tags
 
 ---
 
@@ -160,7 +175,7 @@ Essa separação permite:
 - Python
 - Pydantic
 - SQLAlchemy
-- JWT (adicionado na versão 2.0)
+- JWT
 - MySQL
 - Pytest
 
@@ -205,7 +220,7 @@ Escolhido por:
 - consistência transacional
 - ampla adoção no mercado
 
-## JWT (versão 2.0)
+## JWT
 
 Escolhido para:
 
@@ -220,6 +235,7 @@ Escolhido para:
 ```bash
 API-Olympus/
 ├── backend/
+├── database/
 └── docs/
 ```
 
@@ -230,17 +246,17 @@ API-Olympus/
 ```bash
 backend/
 ├── .venv/
+├── security/
 ├── .env
 ├── main.py
 ├── src/
 │   ├── config/
 │   ├── controllers/
 │   ├── interfaces/
-│   ├── middlewares/ (será adicionado na versão 2.0)
+│   ├── middlewares/
 │   ├── models/
 │   ├── routes/
-│   ├── services/
-│   └── validators/
+│   └── services/ 
 └── tests/
 ```
 
@@ -263,6 +279,18 @@ Controla o fluxo das requisições HTTP.
 
 ---
 
+### `interfaces/`
+
+construção dos schemas e da doc para sweggerAPI.
+
+---
+
+### `middlweares/`
+
+interceptador para gerenciamento de tokenJWT.
+
+---
+
 ### `models/`
 
 Entidades e representação do banco.
@@ -275,21 +303,9 @@ Contém a lógica de negócio.
 
 ---
 
-### `middlewares/`
-
-Interceptação e segurança.
-
----
-
 ### `routes/`
 
 Definição dos endpoints.
-
----
-
-### `validators/`
-
-Validações e regras de entrada.
 
 ---
 
@@ -301,15 +317,39 @@ Testes automatizados da aplicação.
 
 # 🧐 Exemplos de Uso
 
-### Recupera lista de atividades existentes
+### Cadastro
 ![alt text](image.png)
 
-### Recupera lista de atividades execultadas
+### login
+![alt text](image-1.png)
+
+### historico de atividades e comentario da IA
 ![alt text](image-2.png)
 
+### atividades existentes
+![alt text](image-3.png)
 
-### Recupera lista de atividades execultadas por funcional
-![alt text](image-1.png)
+### cadastro de novas atividades
+![alt text](image-4.png)
+
+### lista de todos os usuários
+![alt text](image-5.png)
+
+### lista de todas as atividades
+![alt text](image-6.png)
+
+### cadastro de nova atividade
+![alt text](image-7.png)
+
+### atualização de estado sendo tanto cadastro ativado ou usuario root
+![alt text](image-8.png)
+
+### atualização de informações do usuario
+![alt text](image-9.png)
+
+
+
+
 
 
 ### Cadastra atividades execultadas
@@ -321,9 +361,8 @@ Testes automatizados da aplicação.
 
 # 🚧 Melhorias Futuras
 
-- refresh token
-- OAuth2
-- rate limiting
+- cada usuário poder ter a sua prorpia lista de exercícios fisicos
+- construção do frontend
 - cache com Redis
 - containerização com Docker
 - CI/CD com GitHub Actions
@@ -333,11 +372,8 @@ Testes automatizados da aplicação.
 
 # 🔮 Pontos de Observação
 
-- a API poderia contar com um sistema de login aonde camuflaria a funcional do usuario por meio de um JWT ou ainda usando um azure para assim a funcional vier camuflada
-- poderiam se existir mais tipos de usuarios alem de mais informações sobre o mesmo, podendo essas infromações serem preenchidas de forma manual ou recuperadas por intermedio de uma API de email como a do google, hotmail....
-- o usuario sendo do tipo root, semelhante ao que se encontra comentado, poderia ter outras atualizações, como caso o sistema vier ser comeercializado, desabilitando o mesmo atraves de pquenos comandos, ou podendo por exemplo criar outros tipos de esportes como calisthenics, skate....
-- ainda nos dias atuais poderiamos fazer um monitoramento de forma mais aprofundada atraves dos comentarios dos usuarios podendo fazer uma analise por meio de IAs trazendo possiveis previsibilidades de resultdos futuros caso a pessoa continue seguindo um determinado ritmo
-- na recuperação de lista de todas as atividade execultadas dependendo do caso poderia vim ter sido feita por meio de paginação
-- no cadastro da atividade se pensarmos em um contexto geral poderia vir possuir numeros e letras, todavia no caso do case a unica verificação colocada foi garantir que a mesma fosse devidamente preenchida com validação de uma regex sndo composto por intermedio de 9 números
+- o usuario poderia vir ser criado apartir do consumo de APIs de emails reais como hotmail e gmail
+- poderiamos aplicar sistemas de observabilidade com datadog para termos uma noção exata do que esta acontecendo afim de se ter um ponto factual e termos um acompanhamento de maior proximidade com os nossos usuarios
+- no cadastro da atividade se pensarmos em um contexto geral a funcional poderia vir possuir numeros e letras, todavia no caso do case a unica verificação colocada foi garantir que a mesma fosse devidamente preenchida com validação de uma regex sndo composto por intermedio de 9 números
 
 ---

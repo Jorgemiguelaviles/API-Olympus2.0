@@ -1,6 +1,4 @@
 
 - atualizar a documentação
 
-- finalizar a cobertura dos testes unitarios
-
 - finalizar o power point
