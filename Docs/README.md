@@ -352,11 +352,6 @@ Testes automatizados da aplicação.
 
 
 
-### Cadastra atividades execultadas
-
-
-
-
 ---
 
 # 🚧 Melhorias Futuras
