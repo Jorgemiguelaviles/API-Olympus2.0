@@ -137,8 +137,11 @@ class controller_atividades_realizadas:
             )
 
             # 🔥 CORREÇÃO PRINCIPAL AQUI
-            if isinstance(resultado, dict):
-                resultado = resultado.get("analise") or str(resultado)
+            if not isinstance(resultado, dict):
+                resultado = {
+                    "sucesso": False,
+                    "erro": "Resposta inválida da IA"
+                }
 
             return {
                 "status": "ok",

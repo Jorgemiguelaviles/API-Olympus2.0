@@ -33,6 +33,52 @@ class AtividadeResponseSchema(BaseModel):
 
 
 # ==========================================
+# SINAL DE FADIGA
+# ==========================================
+class SinalFadigaSchema(BaseModel):
+
+    nivel: str = Field(
+        description="Nível de fadiga"
+    )
+
+    descricao: str = Field(
+        description="Descrição do sinal de fadiga"
+    )
+
+
+# ==========================================
+# DADOS DA IA
+# ==========================================
+class DadosAnaliseIASchema(BaseModel):
+
+    resumo: str
+
+    tendencias: List[str]
+
+    sinais_fadiga: List[SinalFadigaSchema]
+
+    recomendacoes_treino: List[str]
+
+    recomendacoes_recuperacao: List[str]
+
+    alertas: List[str]
+
+    conclusao: str
+
+
+# ==========================================
+# RESPOSTA GEMINI
+# ==========================================
+class ResultadoAnaliseIASchema(BaseModel):
+
+    sucesso: bool
+
+    dados: Optional[DadosAnaliseIASchema] = None
+
+    erro: Optional[str] = None
+
+
+# ==========================================
 # IA RESPONSE
 # ==========================================
 class AnaliseIAResponseSchema(BaseModel):
@@ -53,9 +99,11 @@ class AnaliseIAResponseSchema(BaseModel):
         description="Resumo estatístico das atividades"
     )
 
-    analise: Optional[str] = Field(
+    analise: Optional[
+        ResultadoAnaliseIASchema
+    ] = Field(
         default=None,
-        description="Análise textual gerada pela IA"
+        description="Resposta estruturada da IA"
     )
 
 
