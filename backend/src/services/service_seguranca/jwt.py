@@ -31,7 +31,6 @@ def create_access_token(data: dict):
         algorithm=ALGORITHM
     )
 
-    print("token:", token)
     return token
 
 

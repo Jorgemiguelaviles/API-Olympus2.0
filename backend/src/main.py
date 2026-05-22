@@ -67,11 +67,3 @@ app.include_router(
     rotas_de_analise_ia
 )
 
-
-
-print("\n========== ROTAS REGISTRADAS ==========")
-
-for route in app.routes:
-    print(route.path)
-
-print("=======================================\n")
