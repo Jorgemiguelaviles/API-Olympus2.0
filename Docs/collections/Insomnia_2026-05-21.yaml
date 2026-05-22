@@ -1,0 +1,409 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Colection case3
+meta:
+  id: wrk_d096628b17fe4c659274cf8ed1770de2
+  created: 1778804040028
+  modified: 1778804040028
+  description: ""
+collection:
+  - name: material atividades
+    meta:
+      id: fld_e494ebfa93714b4b91845703fb093033
+      created: 1778804051486
+      modified: 1779158833104
+      sortKey: -1778804051486
+      description: ""
+    children:
+      - url: http://localhost:8000/usuarios/cadastro
+        name: Cadastra usuario ok
+        meta:
+          id: req_4577fa3bdd9d4cc8b9a387ab1f504c11
+          created: 1779158836898
+          modified: 1779245496718
+          isPrivate: false
+          description: ""
+          sortKey: -1779158836898
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "usuario": "jorgea@gmail.com",
+              "senha": "Vava@0909",
+              "nome": "Jorge Miguel Aviles"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8000/usuarios/login
+        name: Login usuario ok
+        meta:
+          id: req_93b01bc4428c483caaffd581302a5007
+          created: 1779226414355
+          modified: 1779245580893
+          isPrivate: false
+          description: ""
+          sortKey: -1779226414355
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "usuario": "jorge@gmail.com",
+              "senha": "Vava@0909"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.5.0
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - name: user root
+        meta:
+          id: fld_0c1f760c1140441d878f90f026f60ff4
+          created: 1779229325374
+          modified: 1779229325374
+          sortKey: -1779229325374
+          description: ""
+        children:
+          - url: http://localhost:8000/atividadespraticadas
+            name: recupera_todas_atividades_realizadas ok
+            meta:
+              id: req_5442e883ce6f452ba18ee6d792c75ba3
+              created: 1778897168294
+              modified: 1779242671230
+              isPrivate: false
+              description: ""
+              sortKey: -1779229358818
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8000/usuarios/listar?page=1
+            name: Recupera usuarios ok
+            meta:
+              id: req_1ddcf47de2d14d39a9c82911d8a784fc
+              created: 1779159792872
+              modified: 1779241014546
+              isPrivate: false
+              description: ""
+              sortKey: -1779229358718
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8000/atividades/opcoes
+            name: Cadastrar nova atividade ok
+            meta:
+              id: req_3782a0a71459423da47d898e78d40cde
+              created: 1779232252808
+              modified: 1779246929535
+              isPrivate: false
+              description: ""
+              sortKey: -1779232252808
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "descricao": "volei"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8000/usuarios/configuracao
+            name: Atualiza estado ok
+            meta:
+              id: req_e64ea94c35af49b4b0c0008900e46036
+              created: 1779238306526
+              modified: 1779243087821
+              isPrivate: false
+              description: ""
+              sortKey: -1779238306526
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "funcional": "100000000",
+                	"campo": "usuario_root"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8000/usuarios
+            name: "Atualiza usuario ok "
+            meta:
+              id: req_b886bbcf5fd147798cc233d9ee395d70
+              created: 1779239231559
+              modified: 1779251558406
+              isPrivate: false
+              description: ""
+              sortKey: -1779239231559
+            method: PUT
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "funcional": 100000001,
+                  "nome": "string",
+                  "usuario": "user@example.com",
+                  "senha": "@Notebook#19"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: usuario logado
+        meta:
+          id: fld_fb4890c6fb0e4decae4382f1252cbce9
+          created: 1779229904928
+          modified: 1779229904928
+          sortKey: -1779229904928
+          description: ""
+        children:
+          - url: http://localhost:8000/atividades/opcoes
+            name: recupera_atividades_existentes ok
+            meta:
+              id: req_bc5ad3b4f54a440da38d8055a76d9759
+              created: 1778804055699
+              modified: 1779241186979
+              isPrivate: false
+              description: ""
+              sortKey: -1779229911025
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              disabled: true
+              token: ""
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8000/atividadespraticadas
+            name: cadastro_atividade_execultada ok
+            meta:
+              id: req_78c90bc4b39a48c19d72978c4c8c6583
+              created: 1778897083424
+              modified: 1779242394101
+              isPrivate: false
+              description: ""
+              sortKey: -1779229910925
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                  "codigo_atividade": "ACADEMIA",
+                  "descricao": "Natação por 1h"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8000/atividadespraticadas/minhas
+            name: recupera_atividades_funcional ok
+            meta:
+              id: req_a6b63afe71a648a5b4082400acf70c5b
+              created: 1778897205576
+              modified: 1779243221714
+              isPrivate: false
+              description: ""
+              sortKey: -1779229910825
+            method: GET
+            parameters:
+              - name: ""
+                value: "123"
+                description: ""
+                disabled: false
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:8000/analise-ia/analise/7ed8ef2e-86ef-4bda-a5f6-6bb991c41517
+            name: Status analise ia
+            meta:
+              id: req_2c09a108cc44402ea3951c848da2a0b8
+              created: 1779408734813
+              modified: 1779414821653
+              isPrivate: false
+              description: ""
+              sortKey: -1779408734813
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.5.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_93b01bc4428c483caaffd581302a5007',
+                  '$.access_token', 'never', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_b9729fad724f4d7e69a5bcfc3cfa062bca243258
+    created: 1778804040032
+    modified: 1778804040032
+environments:
+  name: Base Environment
+  meta:
+    id: env_b9729fad724f4d7e69a5bcfc3cfa062bca243258
+    created: 1778804040030
+    modified: 1778804040030
+    isPrivate: false
