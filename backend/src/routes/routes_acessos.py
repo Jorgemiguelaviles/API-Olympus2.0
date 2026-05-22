@@ -2,6 +2,7 @@ from fastapi import (
     APIRouter,
     Depends,
     Query,
+    Request,
     status
 )
 
@@ -110,10 +111,14 @@ def listar_usuarios(
 )
 def alterar_configuracao_usuario(
     payload: UsuarioConfiguracaoSchema,
+    request: Request,
     controller = Depends(get_controller)
 ):
+    
+    user = request.state.user
 
     return controller.alterar_configuracao_usuario(
+        user_id=user.id,
         funcional=payload.funcional,
         campo=payload.campo
     )

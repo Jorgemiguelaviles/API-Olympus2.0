@@ -161,6 +161,7 @@ class controller_usuarios:
     # ==========================================
     def alterar_configuracao_usuario(
         self,
+        user_id: int,
         funcional: int,
         campo: str
     ):
@@ -169,6 +170,7 @@ class controller_usuarios:
 
             # valida tudo
             service_validacao_estados().validar(
+                user_id,
                 funcional,
                 campo,
                 self.db

@@ -19,11 +19,12 @@ class service_validacao_estados:
     # VALIDAR ALTERAÇÃO CONFIG
     # ==========================================
     def validar(
-        self,
-        funcional: int,
-        campo: str,
-        db
-    ):
+            self,
+            user_id: int,
+            funcional: int,
+            campo: str,
+            db
+        ):
 
         # ==========================================
         # VALIDAR USUÁRIO
@@ -35,17 +36,24 @@ class service_validacao_estados:
         ).first()
 
         if not usuario:
-
             raise HTTPException(
                 status_code=404,
                 detail="Usuário não encontrado."
             )
 
         # ==========================================
+        # VALIDAR ALTERAÇÃO PRÓPRIA
+        # ==========================================
+        if user_id == funcional:
+            raise HTTPException(
+                status_code=403,
+                detail="Usuário não pode alterar o próprio estado."
+            )
+
+        # ==========================================
         # VALIDAR CAMPO
         # ==========================================
         if campo not in self.CAMPOS_PERMITIDOS:
-
             raise HTTPException(
                 status_code=400,
                 detail="Campo inválido para alteração."
