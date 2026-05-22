@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from src.interfaces.schemas.schema_atividaddes_realizadas import (
     AtividadeResponseSchema,
-    AnaliseIAResponseSchema,
+    AnaliseIATaskSchema,
     AtividadesPraticadasResponseSchema,
     CadastroAtividadeResponseSchema,
     AtividadeCriacaoSchema
@@ -26,16 +26,28 @@ def test_atividade_response_schema_success():
         "data_hora": datetime.now()
     }
 
-    schema = AtividadeResponseSchema(**data)
+    schema = AtividadeResponseSchema(
+        **data
+    )
 
     assert schema.funcional == 1
-    assert schema.codigo_atividade == "SUPINO-001"
-    assert schema.nome_atividade == "Supino reto"
+
+    assert (
+        schema.codigo_atividade
+        == "SUPINO-001"
+    )
+
+    assert (
+        schema.nome_atividade
+        == "Supino reto"
+    )
 
 
 def test_atividade_response_schema_missing_field():
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(
+        ValidationError
+    ):
 
         AtividadeResponseSchema(
             funcional=1,
@@ -44,56 +56,44 @@ def test_atividade_response_schema_missing_field():
 
 
 # ==========================================
-# ANALISE IA RESPONSE
+# ANALISE IA TASK
 # ==========================================
-def test_analise_ia_response_schema_success():
+def test_analise_ia_task_schema_success():
 
-    data = {
-        "status": "ok",
-        "mensagem": "Análise concluída",
-        "resumo": {
-            "total_treinos": 10
-        },
-        "analise": "Usuário evoluindo bem"
-    }
-
-    schema = AnaliseIAResponseSchema(**data)
-
-    assert schema.status == "ok"
-    assert schema.mensagem == "Análise concluída"
-    assert schema.resumo["total_treinos"] == 10
-    assert schema.analise == "Usuário evoluindo bem"
-
-
-def test_analise_ia_response_schema_optional_fields():
-
-    schema = AnaliseIAResponseSchema(
-        status="fallback"
+    schema = AnaliseIATaskSchema(
+        task_id="abc123",
+        status="processando",
+        endpoint_consulta=(
+            "/analise-ia/analise/abc123"
+        )
     )
 
-    assert schema.status == "fallback"
-    assert schema.mensagem is None
-    assert schema.resumo is None
-    assert schema.analise is None
-
-
-def test_analise_ia_response_ignore_extra_fields():
-
-    schema = AnaliseIAResponseSchema(
-        status="ok",
-        campo_extra="ignorar"
+    assert (
+        schema.task_id
+        == "abc123"
     )
 
-    assert schema.status == "ok"
+    assert (
+        schema.status
+        == "processando"
+    )
 
-    # garante que o campo extra não existe
-    assert not hasattr(schema, "campo_extra")
+
+def test_analise_ia_task_schema_missing_field():
+
+    with pytest.raises(
+        ValidationError
+    ):
+
+        AnaliseIATaskSchema(
+            task_id="abc123"
+        )
 
 
 # ==========================================
 # ATIVIDADES PRATICADAS RESPONSE
 # ==========================================
-def test_atividades_praticadas_response_schema_success():
+def test_atividades_praticadas_response_success():
 
     atividade = {
         "funcional": 1,
@@ -103,22 +103,36 @@ def test_atividades_praticadas_response_schema_success():
     }
 
     analise = {
-        "status": "ok",
-        "analise": "Boa evolução"
+        "task_id": "abc123",
+        "status": "processando",
+        "endpoint_consulta": (
+            "/analise-ia/analise/abc123"
+        )
     }
 
-    schema = AtividadesPraticadasResponseSchema(
-        atividades=[atividade],
-        analise_ia=analise
+    schema = (
+        AtividadesPraticadasResponseSchema(
+            atividades=[atividade],
+            analise_ia=analise
+        )
     )
 
-    assert len(schema.atividades) == 1
-    assert schema.analise_ia.status == "ok"
+    assert (
+        len(schema.atividades)
+        == 1
+    )
+
+    assert (
+        schema.analise_ia.task_id
+        == "abc123"
+    )
 
 
 def test_atividades_praticadas_response_invalid():
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(
+        ValidationError
+    ):
 
         AtividadesPraticadasResponseSchema(
             atividades="errado",
@@ -129,7 +143,7 @@ def test_atividades_praticadas_response_invalid():
 # ==========================================
 # CADASTRO RESPONSE
 # ==========================================
-def test_cadastro_atividade_response_schema_success():
+def test_cadastro_atividade_response_success():
 
     atividade = {
         "funcional": 1,
@@ -138,18 +152,29 @@ def test_cadastro_atividade_response_schema_success():
         "data_hora": datetime.now()
     }
 
-    schema = CadastroAtividadeResponseSchema(
-        status="ok",
-        atividade=atividade
+    schema = (
+        CadastroAtividadeResponseSchema(
+            status="ok",
+            atividade=atividade
+        )
     )
 
-    assert schema.status == "ok"
-    assert schema.atividade.codigo_atividade == "SUPINO-001"
+    assert (
+        schema.status
+        == "ok"
+    )
+
+    assert (
+        schema.atividade.codigo_atividade
+        == "SUPINO-001"
+    )
 
 
 def test_cadastro_atividade_response_invalid():
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(
+        ValidationError
+    ):
 
         CadastroAtividadeResponseSchema(
             status="ok"
@@ -166,8 +191,15 @@ def test_atividade_criacao_schema_success():
         descricao="Treino de peito"
     )
 
-    assert schema.codigo_atividade == "SUPINO-001"
-    assert schema.descricao == "Treino de peito"
+    assert (
+        schema.codigo_atividade
+        == "SUPINO-001"
+    )
+
+    assert (
+        schema.descricao
+        == "Treino de peito"
+    )
 
 
 def test_atividade_criacao_schema_without_descricao():
@@ -181,7 +213,9 @@ def test_atividade_criacao_schema_without_descricao():
 
 def test_atividade_criacao_schema_codigo_vazio():
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(
+        ValidationError
+    ):
 
         AtividadeCriacaoSchema(
             codigo_atividade=""
@@ -190,7 +224,9 @@ def test_atividade_criacao_schema_codigo_vazio():
 
 def test_atividade_criacao_schema_missing_codigo():
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(
+        ValidationError
+    ):
 
         AtividadeCriacaoSchema()
 
@@ -200,9 +236,21 @@ def test_atividade_criacao_schema_missing_codigo():
 # ==========================================
 def test_atividade_criacao_schema_example():
 
-    schema = AtividadeCriacaoSchema.model_json_schema()
+    schema = (
+        AtividadeCriacaoSchema
+        .model_json_schema()
+    )
 
-    example = schema["example"]
+    example = (
+        schema["example"]
+    )
 
-    assert example["codigo_atividade"] == "SUPINO-001"
-    assert example["descricao"] == "Treino de peito e tríceps"
+    assert (
+        example["codigo_atividade"]
+        == "SUPINO-001"
+    )
+
+    assert (
+        example["descricao"]
+        == "Treino de peito"
+    )

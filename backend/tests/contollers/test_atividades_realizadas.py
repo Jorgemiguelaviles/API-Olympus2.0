@@ -1,4 +1,10 @@
-from unittest.mock import MagicMock, patch
+# tests/controllers/test_controller_atividades_realizadas.py
+
+from datetime import datetime
+from unittest.mock import (
+    MagicMock,
+    patch
+)
 
 import pytest
 from fastapi import HTTPException
@@ -12,243 +18,569 @@ from src.contollers.controller_atividades_realizadas import (
 # FIXTURE
 # ==========================================
 @pytest.fixture
-def fake_db():
+def db_mock():
+
     return MagicMock()
 
 
-@pytest.fixture
-def controller(fake_db):
+# ==========================================
+# INIT
+# ==========================================
+def test_init_controller(
+    db_mock
+):
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.load_dotenv"
-    ):
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
 
-        with patch(
-            "src.contollers.controller_atividades_realizadas.os.getenv",
-            return_value="fake-key"
-        ):
+    assert controller.db == db_mock
 
-            return controller_atividades_realizadas(fake_db)
+
+# ==========================================
+# SERIALIZA DICT
+# ==========================================
+def test_serializa_atividade_dict():
+
+    atividade = {
+
+        "funcional": 1,
+
+        "codigo_atividade":
+        "SUPINO-001",
+
+        "descricao":
+        "Supino reto",
+
+        "data_hora":
+        datetime.now()
+    }
+
+    resultado = (
+        controller_atividades_realizadas
+        .serializa_atividade(
+            atividade
+        )
+    )
+
+    assert resultado["funcional"] == 1
+
+    assert (
+        resultado["codigo_atividade"]
+        == "SUPINO-001"
+    )
+
+    assert (
+        resultado["nome_atividade"]
+        == "Supino reto"
+    )
+
+
+# ==========================================
+# SERIALIZA OBJETO
+# ==========================================
+def test_serializa_atividade_objeto():
+
+    atividade = MagicMock()
+
+    atividade.funcional = 1
+
+    atividade.codigo_atividade = (
+        "SUPINO-001"
+    )
+
+    atividade.descricao = (
+        "Supino reto"
+    )
+
+    atividade.data_hora = (
+        datetime.now()
+    )
+
+    resultado = (
+        controller_atividades_realizadas
+        .serializa_atividade(
+            atividade
+        )
+    )
+
+    assert resultado["funcional"] == 1
+
+    assert (
+        resultado["codigo_atividade"]
+        == "SUPINO-001"
+    )
+
+    assert (
+        resultado["nome_atividade"]
+        == "Supino reto"
+    )
 
 
 # ==========================================
 # BUSCAR TODAS - SUCESSO
 # ==========================================
-def test_buscar_todas_atividades_sucesso(controller):
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_buscar_todas_sucesso(
+    mock_service,
+    db_mock
+):
 
-    atividade_mock = MagicMock()
+    atividade = {
 
-    atividade_mock.funcional = 1
-    atividade_mock.codigo_atividade = "abc"
-    atividade_mock.descricao = "Natação"
-    atividade_mock.data_hora = "2025-01-01"
+        "funcional": 1,
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
-    ) as mock_service:
+        "codigo_atividade":
+        "SUPINO-001",
 
-        mock_service.return_value.get_recupera_todas_atividades.return_value = [
-            atividade_mock
-        ]
+        "descricao":
+        "Supino reto",
 
-        resultado = controller.buscar_todas_atividades()
+        "data_hora":
+        datetime.now()
+    }
 
-        assert resultado[0]["funcional"] == 1
-        assert resultado[0]["nome_atividade"] == "Natação"
+    service_instance = (
+        MagicMock()
+    )
+
+    service_instance.get_recupera_todas_atividades.return_value = [
+        atividade
+    ]
+
+    mock_service.return_value = (
+        service_instance
+    )
+
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
+
+    resultado = (
+        controller
+        .buscar_todas_atividades()
+    )
+
+    assert len(resultado) == 1
+
+    assert (
+        resultado[0]["codigo_atividade"]
+        == "SUPINO-001"
+    )
 
 
 # ==========================================
 # BUSCAR TODAS - 404
 # ==========================================
-def test_buscar_todas_atividades_sem_resultado(controller):
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_buscar_todas_not_found(
+    mock_service,
+    db_mock
+):
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
-    ) as mock_service:
+    service_instance = (
+        MagicMock()
+    )
 
-        mock_service.return_value.get_recupera_todas_atividades.return_value = []
+    service_instance.get_recupera_todas_atividades.return_value = []
 
-        with pytest.raises(HTTPException) as erro:
+    mock_service.return_value = (
+        service_instance
+    )
 
-            controller.buscar_todas_atividades()
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
 
-        assert erro.value.status_code == 404
+    with pytest.raises(
+        HTTPException
+    ) as erro:
+
+        controller.buscar_todas_atividades()
+
+    assert (
+        erro.value.status_code
+        == 404
+    )
 
 
 # ==========================================
-# BUSCAR TODAS - EXCEPTION
+# BUSCAR TODAS - ERRO INTERNO
 # ==========================================
-def test_buscar_todas_atividades_exception(controller):
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_buscar_todas_erro(
+    mock_service,
+    db_mock
+):
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
-    ) as mock_service:
+    service_instance = (
+        MagicMock()
+    )
 
-        mock_service.side_effect = Exception("erro fake")
+    service_instance.get_recupera_todas_atividades.side_effect = (
+        Exception("Erro banco")
+    )
 
-        with pytest.raises(HTTPException) as erro:
+    mock_service.return_value = (
+        service_instance
+    )
 
-            controller.buscar_todas_atividades()
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
 
-        assert erro.value.status_code == 500
+    with pytest.raises(
+        HTTPException
+    ) as erro:
+
+        controller.buscar_todas_atividades()
+
+    assert (
+        erro.value.status_code
+        == 500
+    )
 
 
 # ==========================================
 # BUSCAR POR FUNCIONAL - SUCESSO
 # ==========================================
-def test_buscar_por_funcional_sucesso(controller):
+@patch(
+    "src.contollers.controller_atividades_realizadas.gerar_analise_ia_task"
+)
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_buscar_por_funcional_sucesso(
+    mock_service,
+    mock_task,
+    db_mock
+):
 
-    atividades_mock = [
-        {
-            "funcional": 1,
-            "codigo_atividade": "abc",
-            "descricao": "Musculação",
-            "data_hora": "2025"
-        }
+    atividade = {
+
+        "funcional": 1,
+
+        "codigo_atividade":
+        "SUPINO-001",
+
+        "descricao":
+        "Supino reto",
+
+        "data_hora":
+        datetime.now()
+    }
+
+    service_instance = (
+        MagicMock()
+    )
+
+    service_instance.get_recupera_atividades_por_funcional.return_value = [
+        atividade
     ]
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
-    ) as mock_service:
+    mock_service.return_value = (
+        service_instance
+    )
 
-        mock_service.return_value.get_recupera_atividades_por_funcional.return_value = atividades_mock
+    task_mock = MagicMock()
 
-        with patch.object(
-            controller,
-            "_gerar_analise_ia",
-            return_value={"status": "ok"}
-        ):
+    task_mock.id = "abc123"
 
-            resultado = controller.buscar_por_funcional(1)
+    mock_task.delay.return_value = (
+        task_mock
+    )
 
-            assert "atividades" in resultado
-            assert "analise_ia" in resultado
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
+
+    resultado = (
+        controller.buscar_por_funcional(
+            1
+        )
+    )
+
+    assert (
+        resultado["analise_ia"]["task_id"]
+        == "abc123"
+    )
+
+    assert (
+        resultado["analise_ia"]["status"]
+        == "processando"
+    )
 
 
 # ==========================================
 # BUSCAR POR FUNCIONAL - 404
 # ==========================================
-def test_buscar_por_funcional_404(controller):
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_buscar_por_funcional_not_found(
+    mock_service,
+    db_mock
+):
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
-    ) as mock_service:
+    service_instance = (
+        MagicMock()
+    )
 
-        mock_service.return_value.get_recupera_atividades_por_funcional.return_value = []
+    service_instance.get_recupera_atividades_por_funcional.return_value = []
 
-        with pytest.raises(HTTPException) as erro:
+    mock_service.return_value = (
+        service_instance
+    )
 
-            controller.buscar_por_funcional(1)
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
 
-        assert erro.value.status_code == 404
+    with pytest.raises(
+        HTTPException
+    ) as erro:
 
-
-# ==========================================
-# GERAR ANALISE - SEM API KEY
-# ==========================================
-def test_gerar_analise_sem_api_key(fake_db):
-
-    with patch(
-        "src.contollers.controller_atividades_realizadas.os.getenv",
-        return_value=None
-    ):
-
-        controller = controller_atividades_realizadas(fake_db)
-
-        resultado = controller._gerar_analise_ia(
-            ["Natação"],
-            [{"nome_atividade": "Natação"}]
+        controller.buscar_por_funcional(
+            1
         )
 
-        assert resultado["status"] == "no-api-key"
+    assert (
+        erro.value.status_code
+        == 404
+    )
 
 
 # ==========================================
-# GERAR ANALISE - SUCESSO
+# BUSCAR POR FUNCIONAL - ERRO
 # ==========================================
-def test_gerar_analise_sucesso(controller):
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_buscar_por_funcional_erro(
+    mock_service,
+    db_mock
+):
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_gemini"
-    ) as mock_gemini:
+    service_instance = (
+        MagicMock()
+    )
 
-        mock_gemini.return_value.analisa_dados.return_value = {
-            "analise": "Boa evolução"
-        }
+    service_instance.get_recupera_atividades_por_funcional.side_effect = (
+        Exception("Erro banco")
+    )
 
-        resultado = controller._gerar_analise_ia(
-            ["Natação"],
-            [{"nome_atividade": "Natação"}]
+    mock_service.return_value = (
+        service_instance
+    )
+
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
+
+    with pytest.raises(
+        HTTPException
+    ) as erro:
+
+        controller.buscar_por_funcional(
+            1
         )
 
-        assert resultado["status"] == "ok"
-        assert resultado["analise"] == "Boa evolução"
+    assert (
+        erro.value.status_code
+        == 500
+    )
 
 
 # ==========================================
-# GERAR ANALISE - FALLBACK
+# CADASTRAR - SUCESSO
 # ==========================================
-def test_gerar_analise_fallback(controller):
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_validacao_atividade"
+)
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_cadastrar_sucesso(
+    mock_service,
+    mock_validacao,
+    db_mock
+):
 
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_gemini"
-    ) as mock_gemini:
+    atividade = {
 
-        mock_gemini.return_value.analisa_dados.side_effect = Exception(
-            "gemini off"
+        "funcional": 1,
+
+        "codigo_atividade":
+        "SUPINO-001",
+
+        "descricao":
+        "Supino reto",
+
+        "data_hora":
+        datetime.now()
+    }
+
+    service_instance = (
+        MagicMock()
+    )
+
+    service_instance.salvar.return_value = (
+        atividade
+    )
+
+    mock_service.return_value = (
+        service_instance
+    )
+
+    validacao_instance = (
+        MagicMock()
+    )
+
+    mock_validacao.return_value = (
+        validacao_instance
+    )
+
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
+
+    payload = {
+        "descricao":
+        "Supino reto"
+    }
+
+    resultado = (
+        controller.cadastrar_atividade(
+            payload
+        )
+    )
+
+    assert (
+        resultado["status"]
+        == "ok"
+    )
+
+    validacao_instance.validar.assert_called_once()
+
+
+# ==========================================
+# CADASTRAR - HTTP ERROR
+# ==========================================
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_validacao_atividade"
+)
+def test_cadastrar_http_error(
+    mock_validacao,
+    db_mock
+):
+
+    validacao_instance = (
+        MagicMock()
+    )
+
+    validacao_instance.validar.side_effect = (
+        HTTPException(
+            status_code=400,
+            detail="Erro validação"
+        )
+    )
+
+    mock_validacao.return_value = (
+        validacao_instance
+    )
+
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
+
+    with pytest.raises(
+        HTTPException
+    ) as erro:
+
+        controller.cadastrar_atividade(
+            {}
         )
 
-        resultado = controller._gerar_analise_ia(
-            ["Natação"],
-            [{"nome_atividade": "Natação"}]
+    assert (
+        erro.value.status_code
+        == 400
+    )
+
+
+# ==========================================
+# CADASTRAR - ERRO INTERNO
+# ==========================================
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_validacao_atividade"
+)
+@patch(
+    "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
+)
+def test_cadastrar_erro(
+    mock_service,
+    mock_validacao,
+    db_mock
+):
+
+    validacao_instance = (
+        MagicMock()
+    )
+
+    mock_validacao.return_value = (
+        validacao_instance
+    )
+
+    service_instance = (
+        MagicMock()
+    )
+
+    service_instance.salvar.side_effect = (
+        Exception("Erro salvar")
+    )
+
+    mock_service.return_value = (
+        service_instance
+    )
+
+    controller = (
+        controller_atividades_realizadas(
+            db_mock
+        )
+    )
+
+    with pytest.raises(
+        HTTPException
+    ) as erro:
+
+        controller.cadastrar_atividade(
+            {}
         )
 
-        assert resultado["status"] == "fallback"
-
-
-# ==========================================
-# CADASTRAR ATIVIDADE - SUCESSO
-# ==========================================
-def test_cadastrar_atividade_sucesso(controller):
-
-    atividade_mock = MagicMock()
-
-    atividade_mock.funcional = 1
-    atividade_mock.codigo_atividade = "abc"
-    atividade_mock.descricao = "Natação"
-    atividade_mock.data_hora = "2025"
-
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_validacao_atividade"
-    ):
-
-        with patch(
-            "src.contollers.controller_atividades_realizadas.service_atividades_realizadas"
-        ) as mock_service:
-
-            mock_service.return_value.salvar.return_value = atividade_mock
-
-            resultado = controller.cadastrar_atividade({})
-
-            assert resultado["status"] == "ok"
-            assert resultado["atividade"]["nome_atividade"] == "Natação"
-
-
-# ==========================================
-# CADASTRAR ATIVIDADE - EXCEPTION
-# ==========================================
-def test_cadastrar_atividade_exception(controller):
-
-    with patch(
-        "src.contollers.controller_atividades_realizadas.service_validacao_atividade"
-    ) as mock_validacao:
-
-        mock_validacao.return_value.validar.side_effect = Exception(
-            "erro fake"
-        )
-
-        with pytest.raises(HTTPException) as erro:
-
-            controller.cadastrar_atividade({})
-
-        assert erro.value.status_code == 500
+    assert (
+        erro.value.status_code
+        == 500
+    )

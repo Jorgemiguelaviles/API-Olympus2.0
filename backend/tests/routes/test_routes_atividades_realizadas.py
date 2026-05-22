@@ -1,8 +1,9 @@
-# tests/routes/test_routes_atividades_praticadas.py
+# tests/routes/test_rotas_atividades_praticadas.py
 
+from datetime import datetime
 from unittest.mock import MagicMock
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.routes.routes_atividades_realizadas import (
@@ -12,26 +13,9 @@ from src.routes.routes_atividades_realizadas import (
 
 
 # ==========================================
-# APP
+# APP MOCK
 # ==========================================
 app = FastAPI()
-
-
-# ==========================================
-# MIDDLEWARE MOCK USER
-# ==========================================
-@app.middleware("http")
-async def fake_auth(
-    request: Request,
-    call_next
-):
-
-    request.state.user = {
-        "funcional": 999
-    }
-
-    return await call_next(request)
-
 
 app.include_router(
     roteador_atividades_praticadas
@@ -39,29 +23,57 @@ app.include_router(
 
 
 # ==========================================
-# MOCK CONTROLLER
+# MIDDLEWARE MOCK USER
 # ==========================================
-mock_controller = MagicMock()
+@app.middleware("http")
+async def mock_user(
+    request,
+    call_next
+):
 
-app.dependency_overrides[get_controller] = (
-    lambda: mock_controller
-)
+    request.state.user = {
+        "funcional": 999
+    }
 
+    response = await call_next(request)
+
+    return response
+
+
+# ==========================================
+# FIXTURE CLIENT
+# ==========================================
 client = TestClient(app)
 
 
 # ==========================================
-# CADASTRAR ATIVIDADE
+# FIXTURE CONTROLLER
 # ==========================================
-def test_cadastrar_atividade():
+def override_controller():
 
-    mock_controller.cadastrar_atividade.return_value = {
+    controller = MagicMock()
+
+    app.dependency_overrides[
+        get_controller
+    ] = lambda: controller
+
+    return controller
+
+
+# ==========================================
+# POST /atividadespraticadas
+# ==========================================
+def test_cadastrar_atividade_sucesso():
+
+    controller = override_controller()
+
+    controller.cadastrar_atividade.return_value = {
         "status": "ok",
         "atividade": {
             "funcional": 999,
             "codigo_atividade": "SUPINO-001",
-            "nome_atividade": "SUPINO",
-            "data_hora": "2026-01-01T10:00:00"
+            "nome_atividade": "Supino",
+            "data_hora": str(datetime.now())
         }
     }
 
@@ -69,7 +81,7 @@ def test_cadastrar_atividade():
         "/atividadespraticadas/",
         json={
             "codigo_atividade": "SUPINO-001",
-            "descricao": "Treino peito"
+            "descricao": "Supino"
         }
     )
 
@@ -79,23 +91,53 @@ def test_cadastrar_atividade():
 
     assert body["status"] == "ok"
 
-    assert (
-        body["atividade"]["codigo_atividade"]
-        == "SUPINO-001"
+    controller.cadastrar_atividade.assert_called_once()
+
+    payload = (
+        controller
+        .cadastrar_atividade
+        .call_args[0][0]
     )
 
-    mock_controller.cadastrar_atividade.assert_called_once()
+    assert payload["funcional"] == 999
+    assert payload["codigo_atividade"] == "SUPINO-001"
+    assert payload["descricao"] == "Supino"
+
+    assert isinstance(
+        payload["data_hora"],
+        datetime
+    )
 
 
 # ==========================================
-# BUSCAR MINHAS ATIVIDADES
+# POST INVALIDO
+# ==========================================
+def test_cadastrar_atividade_payload_invalido():
+
+    override_controller()
+
+    response = client.post(
+        "/atividadespraticadas/",
+        json={}
+    )
+
+    assert response.status_code == 422
+
+
+# ==========================================
+# GET /minhas
 # ==========================================
 def test_buscar_minhas_atividades():
 
-    mock_controller.buscar_por_funcional.return_value = {
+    controller = override_controller()
+
+    controller.buscar_por_funcional.return_value = {
         "atividades": [],
         "analise_ia": {
-            "status": "ok"
+            "task_id": "123",
+            "status": "processando",
+            "endpoint_consulta":
+            "/analise-ia/analise/123"
         }
     }
 
@@ -108,25 +150,26 @@ def test_buscar_minhas_atividades():
     body = response.json()
 
     assert "atividades" in body
-
     assert "analise_ia" in body
 
-    mock_controller.buscar_por_funcional.assert_called_once_with(
+    controller.buscar_por_funcional.assert_called_once_with(
         999
     )
 
 
 # ==========================================
-# BUSCAR TODAS
+# GET /
 # ==========================================
 def test_buscar_todas_atividades():
 
-    mock_controller.buscar_todas_atividades.return_value = [
+    controller = override_controller()
+
+    controller.buscar_todas_atividades.return_value = [
         {
-            "funcional": 999,
+            "funcional": 1,
             "codigo_atividade": "SUPINO-001",
-            "nome_atividade": "SUPINO",
-            "data_hora": "2026-01-01T10:00:00"
+            "nome_atividade": "Supino",
+            "data_hora": str(datetime.now())
         }
     ]
 
@@ -138,41 +181,36 @@ def test_buscar_todas_atividades():
 
     body = response.json()
 
-    assert len(body) == 1
+    assert isinstance(body, list)
 
-    assert (
-        body[0]["codigo_atividade"]
-        == "SUPINO-001"
+    assert body[0]["codigo_atividade"] == (
+        "SUPINO-001"
     )
 
-    mock_controller.buscar_todas_atividades.assert_called_once()
+    controller.buscar_todas_atividades.assert_called_once()
 
 
 # ==========================================
-# VALIDAÇÃO PAYLOAD
+# GET TODAS VAZIO
 # ==========================================
-def test_cadastrar_atividade_payload_invalido():
+def test_buscar_todas_atividades_vazio():
 
-    response = client.post(
-        "/atividadespraticadas/",
-        json={
-            "codigo_atividade": ""
-        }
+    controller = override_controller()
+
+    controller.buscar_todas_atividades.return_value = []
+
+    response = client.get(
+        "/atividadespraticadas/"
     )
 
-    assert response.status_code == 422
+    assert response.status_code == 200
+
+    assert response.json() == []
 
 
 # ==========================================
-# VALIDAÇÃO CAMPO OBRIGATÓRIO
+# REMOVE OVERRIDE
 # ==========================================
-def test_cadastrar_atividade_sem_codigo():
+def teardown_module():
 
-    response = client.post(
-        "/atividadespraticadas/",
-        json={
-            "descricao": "Treino peito"
-        }
-    )
-
-    assert response.status_code == 422
+    app.dependency_overrides = {}

@@ -221,7 +221,7 @@ Essa separação permite:
 ## Comando para testar testes automatizados
 
 ```env
-pytest -v --cov=src --cov-report=html
+pytest --cov=src --cov-report=term-missing
 ```
 
 ---
