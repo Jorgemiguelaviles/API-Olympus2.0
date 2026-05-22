@@ -15,6 +15,10 @@ from src.routes.routes_acessos import (
     roteador_usuarios as rotas_de_usuarios
 )
 
+from src.routes.routes_analise_IA import (
+    roteador_analise_ia as rotas_de_analise_ia
+)
+
 from src.interfaces.docs.docs_main import (
     SWAGGER_CONFIG
 )
@@ -58,3 +62,16 @@ app.include_router(
 app.include_router(
     rotas_de_usuarios
 )
+
+app.include_router(
+    rotas_de_analise_ia
+)
+
+
+
+print("\n========== ROTAS REGISTRADAS ==========")
+
+for route in app.routes:
+    print(route.path)
+
+print("=======================================\n")

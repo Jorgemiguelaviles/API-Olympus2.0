@@ -43,6 +43,7 @@ A proposta é construir uma arquitetura escalável, segura e preparada para evol
 - Python (≥ 3.10)
 - pip
 - MySQL
+- Docker para gerenciar o celery
 
 ---
 
@@ -94,9 +95,19 @@ com isso você ira grar um par de chaves sendo uma publica e uma privada, a publ
 
 
 ### Rodar servidor
-
+inicia FastAPI
 ```bash
-uvicorn main:app --reload
+uvicorn src.main:app --reload
+```
+
+inicia celery
+```bash
+celery -A src.infraestructure.celery.celery_app worker --pool=solo --loglevel=info
+```
+
+inicia redis
+```bash
+docker run -d --name redis-olympus -p 6379:6379 redis
 ```
 
 ### Endpoints locais
@@ -112,6 +123,14 @@ Swagger:
 ```bash
 http://localhost:8000/docs
 ```
+
+
+Redis:
+
+```bash
+localhost:6379
+```
+
 
 ---
 
@@ -198,6 +217,12 @@ Essa separação permite:
 - testes unitários
 - testes de integração
 - validação de endpoints
+
+## Comando para testar testes automatizados
+
+```env
+pytest -v --cov=src --cov-report=html
+```
 
 ---
 
@@ -323,7 +348,7 @@ Testes automatizados da aplicação.
 ### login
 ![alt text](image-1.png)
 
-### historico de atividades e comentario da IA
+### historico de suas atividades mais chamada de analise de IA
 ![alt text](image-2.png)
 
 ### atividades existentes
@@ -347,7 +372,8 @@ Testes automatizados da aplicação.
 ### atualização de informações do usuario
 ![alt text](image-9.png)
 
-
+### Resposta da IA
+![alt text](image-10.png)
 
 
 

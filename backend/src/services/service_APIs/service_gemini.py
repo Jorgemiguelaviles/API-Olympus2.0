@@ -1,46 +1,101 @@
-from google import genai
+import os
 import json
+import logging
+
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google import genai
+
+
+# ==========================================
+# CONFIGURAÇÃO .ENV
+# ==========================================
+BASE_DIR = (
+    Path(__file__)
+    .resolve()
+    .parent
+    .parent
+    .parent
+    .parent
+)
+
+dotenv_path = BASE_DIR / ".env"
+
+load_dotenv(dotenv_path)
+
+
+logger = logging.getLogger(__name__)
 
 
 class service_gemini:
 
+
     # ==========================================
-    # Construtor
+    # CONSTRUTOR
     # ==========================================
-    def __init__(self, chave_api=None):
+    def __init__(self):
+
+        chave_api = os.getenv(
+            "API_KEY_GEMINI"
+        )
+
+        logger.info(
+            "Carregando API Gemini."
+        )
+
+        logger.info(
+            "Path .env: %s",
+            dotenv_path
+        )
+
+        logger.info(
+            "API encontrada: %s",
+            bool(chave_api)
+        )
 
         if not chave_api:
 
             raise ValueError(
-                "API_KEY_GEMINI não encontrada no .env"
+                "API_KEY_GEMINI não encontrada."
             )
 
         self.client = genai.Client(
             api_key=chave_api
         )
 
+
     # ==========================================
-    # Schema padrão da resposta
+    # SCHEMA PADRÃO
     # ==========================================
-    def retorna_schema_resposta(self):
+    @staticmethod
+    def retorna_schema_resposta():
 
         return {
+
             "resumo": "",
+
             "tendencias": [],
+
             "sinais_fadiga": [],
+
             "recomendacoes_treino": [],
+
             "recomendacoes_recuperacao": [],
+
             "alertas": [],
+
             "conclusao": ""
         }
 
+
     # ==========================================
-    # Montar prompt
+    # MONTA PROMPT
     # ==========================================
     def monta_prompt(
         self,
         dados_usuario: list,
-        prompt_usuario: str,
+        prompt_usuario: str
     ):
 
         dados_formatados = json.dumps(
@@ -55,140 +110,127 @@ class service_gemini:
             ensure_ascii=False
         )
 
-        prompt_completo = f"""
+        return f"""
 Você é um especialista em análise de desempenho físico.
 
-Analise os dados abaixo e gere:
-
-1. Tendência das próximas semanas
-2. Possíveis sinais de fadiga
-3. Recomendações de treino
-4. Recomendações de recuperação
-
-OBS:
-- Fique atento a possíveis sinais de overtraining.
-- Analise quedas de desempenho.
-- Analise frequência cardíaca elevada.
-- Analise distúrbios do sono.
-- Analise mudanças de humor.
-- Caso encontre sinais de excesso, recomende redução de intensidade.
-
 IMPORTANTE:
-Caso existam poucos dados, considere que o usuário está no início da jornada fitness.
-
-Mesmo com poucos dados:
-- Gere uma análise coerente.
-- Sugira melhorias produtivas.
-- Oriente evolução gradual.
-- Evite respostas genéricas.
-
-IMPORTANTE:
-- Retorne SOMENTE um JSON válido.
-- NÃO utilize markdown.
-- NÃO utilize ```json.
-- NÃO escreva nenhum texto fora do JSON.
-- NÃO utilize comentários.
+- Retorne SOMENTE JSON válido
+- NÃO utilize markdown
+- NÃO utilize comentários
+- NÃO escreva texto fora do JSON
 
 ESTRUTURA OBRIGATÓRIA:
 
 {estrutura_json}
 
-REGRAS IMPORTANTES:
-- "tendencias" deve ser uma lista de strings.
-- "sinais_fadiga" deve ser uma lista de objetos contendo:
-    {{
-        "nivel": "baixo/médio/alto",
-        "descricao": "texto"
-    }}
+REGRAS:
+- tendencias -> lista de strings
+- sinais_fadiga -> lista de objetos
+- recomendacoes_treino -> lista
+- recomendacoes_recuperacao -> lista
+- alertas -> lista
+- conclusao -> string
 
-- "recomendacoes_treino" deve ser uma lista.
-- "recomendacoes_recuperacao" deve ser uma lista.
-- "alertas" deve ser uma lista.
-- "conclusao" deve ser uma string.
-
-Dados do usuário:
+Dados:
 
 {dados_formatados}
 
-Pedido do usuário:
+Pedido:
 
 {prompt_usuario}
 """
 
-        return prompt_completo
 
     # ==========================================
-    # Limpar resposta da IA
+    # LIMPA RESPOSTA
     # ==========================================
+    @staticmethod
     def limpa_resposta(
-        self,
         resposta_texto: str
     ):
 
-        resposta_limpa = (
+        if not resposta_texto:
+
+            raise ValueError(
+                "Resposta vazia recebida da IA."
+            )
+
+        return (
             resposta_texto
             .replace("```json", "")
             .replace("```", "")
             .strip()
         )
 
-        return resposta_limpa
 
     # ==========================================
-    # Validar estrutura da resposta
+    # VALIDA ESTRUTURA
     # ==========================================
     def valida_estrutura_resposta(
         self,
         resposta_json: dict
     ):
 
-        estrutura_padrao = self.retorna_schema_resposta()
+        if not isinstance(
+            resposta_json,
+            dict
+        ):
 
-        for chave in estrutura_padrao.keys():
+            raise ValueError(
+                "Resposta da IA não é um JSON válido."
+            )
+
+        estrutura = (
+            self.retorna_schema_resposta()
+        )
+
+        for chave, valor in estrutura.items():
 
             if chave not in resposta_json:
 
-                resposta_json[chave] = estrutura_padrao[chave]
+                resposta_json[chave] = valor
 
         return resposta_json
 
+
     # ==========================================
-    # Formatar resposta final
+    # CONVERTE RESPOSTA JSON
     # ==========================================
-    def formata_resposta(
+    def converte_resposta_json(
         self,
         resposta_texto: str
     ):
 
         try:
 
-            resposta_limpa = self.limpa_resposta(
-                resposta_texto
+            resposta_limpa = (
+                self.limpa_resposta(
+                    resposta_texto
+                )
             )
 
             resposta_json = json.loads(
                 resposta_limpa
             )
 
-            resposta_json = self.valida_estrutura_resposta(
+            return self.valida_estrutura_resposta(
                 resposta_json
             )
 
-            return {
-                "sucesso": True,
-                "dados": resposta_json
-            }
+        except json.JSONDecodeError as erro:
 
-        except Exception as erro:
+            logger.error(
+                "Erro ao converter JSON da IA: %s",
+                str(erro)
+            )
 
-            return {
-                "sucesso": False,
-                "erro": str(erro),
-                "resposta_original": resposta_texto
-            }
+            raise ValueError(
+                "IA retornou JSON inválido."
+            )
+
 
     # ==========================================
-    # Gerar análise IA
+    # GERA ANÁLISE
     # ==========================================
     def analisa_dados(
         self,
@@ -196,8 +238,8 @@ Pedido do usuário:
         prompt_usuario: str
     ):
 
-        print(
-            "Realizando análise com Gemini..."
+        logger.info(
+            "Iniciando análise Gemini."
         )
 
         prompt = self.monta_prompt(
@@ -207,28 +249,46 @@ Pedido do usuário:
 
         try:
 
-            response = self.client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[
-                    {
-                        "parts": [
-                            {
-                                "text": prompt
-                            }
-                        ]
-                    }
-                ]
+            response = (
+                self.client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt
+                )
             )
 
-            resposta_formatada = self.formata_resposta(
-                response.text
+            if not hasattr(
+                response,
+                "text"
+            ):
+
+                raise ValueError(
+                    "Resposta Gemini sem atributo text."
+                )
+
+            if not response.text:
+
+                raise ValueError(
+                    "Gemini retornou resposta vazia."
+                )
+
+            resposta = (
+                self.converte_resposta_json(
+                    response.text
+                )
             )
 
-            return resposta_formatada
+            logger.info(
+                "Análise Gemini concluída com sucesso."
+            )
+
+            return resposta
 
         except Exception as erro:
 
-            return {
-                "sucesso": False,
-                "erro": f"Erro ao gerar análise: {str(erro)}"
-            }
+            logger.exception(
+                "Erro ao gerar análise Gemini."
+            )
+
+            raise RuntimeError(
+                f"Erro ao gerar análise IA: {str(erro)}"
+            )

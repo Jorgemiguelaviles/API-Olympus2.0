@@ -30,6 +30,9 @@ PUBLIC_ROUTES = {r.rstrip("/") for r in PUBLIC_ROUTES}
 USER_ALLOWED_ROUTES = {
     ("POST", "/atividadespraticadas"),
     ("GET", "/atividades/opcoes"),
+    ("GET", "/atividadespraticadas/minhas"),
+    ("GET", "/atividadespraticadas/minhas"),
+    ("GET", "/analise-ia/analise/{task_id}")
 }
 
 
